@@ -1,0 +1,15 @@
+global:
+  host: "loadtesting.xix.in"
+  sunbird: 
+    enable_auth: false 
+    signing_algo: Ed25519
+    jwks_uri: ""
+  vault: 
+    address: http://vault:8200
+    base_url: http://vault:8200/v1
+    root_path: http://vault:8200/v1/kv
+    vault_timeout: 5000
+    vault_proxy: false
+  secrets:
+    VAULT_SECRET_TOKEN: aHZzLioqKioqKioqKioqKioqKioqKioqKioqKg==
+    DB_URL: e3tkYXRhYmFzZV90eXBlOnBvc3RncmVzfX06Ly97e2RhdGFic2VfdXNlbmFtZX19Ont7ZGF0YWJhc2VfcGFzc3dvcmR9fUB7e2RhdGFiYXNlX2hvc3Q6bG9jYWxob3N0fX06e3tkYXRhYmFzZV9wb3J0OjU0MzJ9fS97e2RhdGFiYXNlX25hbWU6c3VuYmlyZHJjfX0=
