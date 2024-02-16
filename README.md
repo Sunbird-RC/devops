@@ -1,2 +1,2 @@
-# deployment
-Helm Charts needed for deploying sunbird-RC services
+# Devops
+Infrastructure automation and Deployment files
