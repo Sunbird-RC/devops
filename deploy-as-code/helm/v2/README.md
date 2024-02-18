@@ -14,7 +14,7 @@ The below scripts will help the adopters to deploy SunbirdRC services in kuberne
 ### Clone the repo
 ```bash
 git clone https://github.com/Sunbird-RC/deployment.git
-cd helms/v2
+cd helm/v2
 ```
 
 ### Pre check
