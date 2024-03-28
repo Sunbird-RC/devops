@@ -27,6 +27,21 @@ global:
     enable_webhook: false
     webhook_url: http://localhost:5001/api/v1/callback
     manager_type: DefinitionsManager
+    swagger_enabled: true
+    swagger_title: SUNBIRD-RC
+    authentication_enabled: true
+    claims_enabled: true
+    certificate_enabled: true
+    encryption_enabled: false
+    idgen_enabled: false
+    opa_enabled: false
+    opa_allow_key_name: authorized
+    encryption_port : 8013
+    context-path : /
+    idformatFromMdms: false
+    mdmsProvider: org.egov.id.masterdata.provider.DBMasterDataProvider
+    autoCreateNewSeq: true
+    migrationEnabled: true 
   minio:
     url: http://10.9.0.9:9000
     access_key: admin

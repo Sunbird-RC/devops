@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{ .Release.Namespace }}
+data:
+  DB_ADDR: {{.Values.global.database.host | quote}}
+  DB_DATABASE: {{.Values.global.keycloak.database | quote}}
+  DB_PORT: {{.Values.global.database.port | quote}}
+  DB_USER: {{.Values.global.database.user | quote}}
+  DB_VENDOR: {{.Values.global.database.vendor | quote}}
+  KEYCLOAK_USER: {{.Values.global.keycloak.admin.username | quote}}
+  PROXY_ADDRESS_FORWARDING: {{.Values.global.keycloak.proxy_forwarding | quote}}
+  connectionInfo_uri: jdbc:postgresql://{{.Values.global.database.host}}:{{.Values.global.database.port}}/{{.Values.global.registry.database}}
+  connectionInfo_username: {{.Values.global.database.user | quote}}
+  elastic_search_connection_url: {{.Values.global.elastic_search.url | quote}}
+  elastic_search_auth_enabled: {{.Values.global.elastic_search.auth_enabled | quote}}
+  elastic_search_username: {{.Values.global.elastic_search.username | quote}}
+  search_providerName: {{.Values.global.registry.search_provider | quote}}
+  sunbird_sso_realm: {{.Values.global.registry.sso.realm | quote}}
+  sunbird_sso_url: http://{{ .Release.Name }}-keycloak-service:8080/auth
+  sunbird_sso_admin_client_id: {{.Values.global.registry.sso.admin_client_id | quote}}
+  sunbird_sso_client_id: {{.Values.global.registry.sso.client_id | quote}}
+  idgen_health_check_url: http://{{ .Release.Name }}-id-gen-service:8088/health
+  idgen_generate_url: http://{{ .Release.Name }}-id-gen-service:8088/id/_generate
+  idgen_id_format_url: http://{{ .Release.Name }}-id-gen-service:8088/id/_format/add
+  encryption_health_check_url: http://{{ .Release.Name }}-encryption-service:8013/health
+  encryption_uri: http://{{ .Release.Name }}-encryption-service:8013/crypto/v1/_encrypt
+  encryption_batch_uri: http://{{ .Release.Name }}-encryption-service:8013/crypto/v1/_encrypt
+  claims_url: http://{{ .Release.Name }}-claim-ms:8082
+  sign_url: http://{{ .Release.Name }}-certificate-signer:8079/sign
+  verify_url: http://{{ .Release.Name }}-certificate-signer:8079/verify
+  sign_health_check_url: http://{{ .Release.Name }}-certificate-signer:8079/health
+  signature_enabled: {{.Values.global.registry.signature_enabled | quote}}
+  pdf_url: http://{{ .Release.Name }}-certificate-api:8078/api/v1/certificatePDF
+  certificate_health_check_url: http://{{ .Release.Name }}-certificate-api:8078/health
+  template_base_url: http://{{ .Release.Name }}-registry:8081/api/v1/templates/ #Looks for certificate templates for pdf copy of the signed certificate
+  sunbird_keycloak_user_set_password: {{.Values.global.registry.keycloak_user_set_password | quote}}
+  filestorage_connection_url: {{.Values.global.minio.url | quote}}
+  filestorage_access_key: {{.Values.global.minio.access_key | quote}}
+  filestorage_bucket_key: {{.Values.global.minio.bucket_key | quote}}
+  registry_base_apis_enable: {{.Values.global.registry.base_apis_enabled | quote}}
+  logging.level.root: {{.Values.global.registry.log_level | quote}}
+  enable_external_templates: {{.Values.global.registry.enable_external_templates | quote}}
+  async_enabled: {{.Values.global.registry.enable_async | quote}}
+  authentication_enabled: {{.Values.global.registry.enable_authentication | quote}}
+  kafka_bootstrap_address: {{.Values.global.kafka.url | quote}}
+  webhook_enabled: {{.Values.global.registry.enable_webhook | quote}}
+  webhook_url: {{.Values.global.registry.webhook_url | quote}}
+  redis_host: {{.Values.global.redis.host | quote}}
+  redis_port: {{.Values.global.redis.port | quote}}
+  manager_type: {{.Values.global.registry.manager_type | quote}}
+  sunbirdrc_url: http://{{ .Release.Name }}-registry:8081
+  opa_allow_key_name: {{.Values.global.registry.opa_allow_key_name | quote}}
+  opa_enabled: {{.Values.global.registry.opa_enabled | quote}}
+  swagger_enabled: {{.Values.global.registry.swagger_enabled| quote}}
+  swagger_title: {{.Values.global.registry.swagger_title| quote}}
+  claims_enabled: {{.Values.global.registry.claims_enabled | quote}}
+  certificate_enabled: {{.Values.global.registry.certificate_enabled | quote}}
+  encryption_enabled: {{.Values.global.registry.encryption_enabled | quote}}
+  idgen_enabled: {{.Values.global.registry.idgen_enabled | quote}}
+  spring.datasource.url: jdbc:postgresql://{{.Values.global.database.host}}:{{.Values.global.database.port}}/{{.Values.global.registry.database}}
+  spring.flyway.url: jdbc:postgresql://{{.Values.global.database.host}}:{{.Values.global.database.port}}/{{.Values.global.registry.database}}
+  spring.flyway.baseline-on-migrate: {{.Values.global.registry.migrationEnabled | quote}}
+  autocreate.new.seq:  {{.Values.global.registry.autoCreateNewSeq | quote}}
+  idformat.from.mdms: {{.Values.global.registry.idformatFromMdms | quote}}
+  egov.mdms.provider: {{.Values.global.registry.mdmsProvider | quote}}
+  server.port: {{.Values.global.registry.encryption_port | quote}}
+  server.servlet.context-path: {{.Values.global.registry.context-path | quote}}
+  management.endpoints.web.base-path: {{.Values.global.registry.context-path | quote}}
+  spring.datasource.username: {{.Values.global.database.user | quote}}
+  IDENTITY_BASE_URL: http://{{ .Release.Name }}-identity-service:3332
+  SCHEMA_BASE_URL: http://{{ .Release.Name }}-credential-schema-service:3333
+  CREDENTIAL_SERVICE_BASE_URL: http://{{ .Release.Name }}-credentials-service:3000
+  JWKS_URI: {{.Values.global.sunbird.jwks_uri | quote}}
+  ENABLE_AUTH: {{.Values.global.sunbird.enable_auth | quote}}
+  VAULT_ADDR: {{.Values.global.vault.address | quote}} 
+  VAULT_BASE_URL: {{.Values.global.vault.base_url | quote}}
+  VAULT_ROOT_PATH: {{.Values.global.vault.root_path | quote}}
+  VAULT_TIMEOUT: {{.Values.global.vault.vault_timeout | quote}}
+  VAULT_PROXY: {{.Values.global.vault.vault_proxy | quote}}
+  SIGNING_ALGORITHM: {{.Values.global.sunbird.signing_algo | quote}}
+  did_enabled:  {{.Values.global.registry.did_enabled | quote}}
+  did_health_check_url: http://{{ .Release.Name }}-identity-service:3332/health
+  did_generate_url: http://{{ .Release.Name }}-identity-service:3332/did/generate
+  did_resolve_url: http://{{ .Release.Name }}-identity-service:3332/did/resolve/{id}
+  signature_provider: {{.Values.global.registry.signature_provider | quote}}
+  signature_v2_credential_did_method: {{.Values.global.registry.credential_did_method | quote}}
+  signature_v2_issuer_did_method: {{.Values.global.registry.issuer_did_method | quote}}
+  signature_v2_schema_author: {{.Values.global.registry.schema_author | quote}}
+  signature_v2_schema_author_did_method: {{.Values.global.registry.schema_author_did_method | quote}}
+  signature_v2_health_check_url: http://{{ .Release.Name }}-credentials-service:3000/health
+  signature_v2_issue_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/issue
+  signature_v2_get_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/{id}
+  signature_v2_delete_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/{id}
+  signature_v2_verify_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/{id}/verify
+  signature_v2_revocation_list_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/revocation-list?issuerId={issuerDid}&page={page}&limit={limit}
+  signature_v2_schema_health_check_url: http://{{ .Release.Name }}-credential-schema-service:3333/health
+  signature_v2_schema_create_url: http://{{ .Release.Name }}-credential-schema-service:3333/credential-schema
+  signature_v2_schema_update_url: http://{{ .Release.Name }}-credential-schema-service:3333/credential-schema/{id}/{version}
+  signature_v2_schema_get_by_id_and_version_url: http://{{ .Release.Name }}-credential-schema-service:3333/credential-schema/{id}/{version}
+  signature_v2_schema_search_by_tags_url: http://{{ .Release.Name }}-credential-schema-service:3333/credential-schema?tags={tags}

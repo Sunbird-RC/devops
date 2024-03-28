@@ -1,0 +1,83 @@
+global:
+  host: "loadtesting.xix.in"
+  database:
+    host: "10.9.0.7"
+    user: "keycloak"
+    port: "5432"
+    vendor: "postgres"
+  keycloak:
+    database: "keycloak"
+    admin:
+      username: "admin"
+    proxy_forwarding: true
+  registry:
+    database: "registry"
+    search_provider: "dev.sunbirdrc.registry.service.ElasticSearchService"
+    signature_provider: "dev.sunbirdrc.registry.service.impl.SignatureV2ServiceImpl"
+    sso:
+      realm: "sunbird-rc"
+      admin_client_id: "admin-api"
+      client_id: "registry-frontend"
+    signature_enabled: true
+    keycloak_user_set_password: false
+    base_apis_enabled: false
+    log_level: INFO
+    enable_external_templates: true
+    enable_async: false
+    enable_authentication: true
+    enable_webhook: false
+    webhook_url: http://localhost:5001/api/v1/callback
+    manager_type: DefinitionsManager
+    swagger_enabled: true
+    swagger_title: SUNBIRD-RC
+    authentication_enabled: true
+    claims_enabled: true
+    certificate_enabled: true
+    encryption_enabled: false
+    idgen_enabled: false
+    opa_enabled: false
+    opa_allow_key_name: authorized
+    encryption_port : 8013
+    context-path : /
+    idformatFromMdms: false
+    mdmsProvider: org.egov.id.masterdata.provider.DBMasterDataProvider
+    autoCreateNewSeq: true
+    migrationEnabled: true 
+    did_enabled: true
+    credential_did_method: rcw
+    issuer_did_method : issuer
+    schema_author: Registry
+    schema_author_did_method: author
+  minio:
+    url: http://10.9.0.9:9000
+    access_key: admin
+    bucket_key: sunbird-rc
+  elastic_search:
+    url: 10.9.0.9:9200
+    auth_enabled: false
+    username: ""
+  kafka:
+    url:
+  redis:
+    host: 10.9.0.8
+    port: 6379
+  vault: 
+    address: http://vault:8200
+    base_url: http://vault:8200/v1
+    root_path: http://vault:8200/v1/kv
+    vault_timeout: 5000
+    vault_proxy: false
+  sunbird: 
+    enable_auth: false 
+    signing_algo: Ed25519
+    jwks_uri: ""
+  secrets:
+    DB_PASSWORD: a2V5Y2xvYWs=
+    ELASTIC_SEARCH_PASSWORD: ""
+    KEYCLOAK_ADMIN_CLIENT_SECRET: YjJiMGNhYjEtMjQzZC00ZTZlLTkzZTctOTAxNWZmNjZkZjJi
+    KEYCLOAK_ADMIN_PASSWORD: YWRtaW4xMjM=
+    KEYCLOAK_DEFAULT_USER_PASSWORD: YWRtaW5AMTIz
+    MINIO_SECRET_KEY: Kgo=
+    VAULT_SECRET_TOKEN: aHZzLioqKioqKioqKioqKioqKioqKioqKioqKg==
+    DB_URL: e3tkYXRhYmFzZV90eXBlOnBvc3RncmVzfX06Ly97e2RhdGFic2VfdXNlbmFtZX19Ont7ZGF0YWJhc2VfcGFzc3dvcmR9fUB7e2RhdGFiYXNlX2hvc3Q6bG9jYWxob3N0fX06e3tkYXRhYmFzZV9wb3J0OjU0MzJ9fS97e2RhdGFiYXNlX25hbWU6c3VuYmlyZHJjfX0=
+
