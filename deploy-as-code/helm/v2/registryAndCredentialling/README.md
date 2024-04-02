@@ -39,6 +39,7 @@ kubectl create ns demo-registry
 `Feel free to use a different name for the namespace. Use the same name in the reset of the commands.`
 
 ## Vault Deployment 
+# (Chart version : 0.24.0 and vault image: hashicorp/vault:1.13.1) 
 
 We use hashicorp vault as the keystore (for ore details you can refer here : https://developer.hashicorp.com/vault )
 

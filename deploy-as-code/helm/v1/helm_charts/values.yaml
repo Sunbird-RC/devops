@@ -62,3 +62,9 @@ global:
     KEYCLOAK_ADMIN_PASSWORD: YWRtaW4xMjM=
     KEYCLOAK_DEFAULT_USER_PASSWORD: YWRtaW5AMTIz
     MINIO_SECRET_KEY: Kgo=
+encryption-service:
+    envVars:
+      egov_mdms_provider: org.egov.enc.masterdata.provider.DBMasterDataProvider
+id-gen-service:
+    envVars:
+      egov_mdms_provider: org.egov.id.masterdata.provider.DBMasterDataProvider

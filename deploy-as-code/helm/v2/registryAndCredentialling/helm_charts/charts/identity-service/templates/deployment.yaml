@@ -43,7 +43,6 @@ spec:
                 secretKeyRef:
                   name: rc-secret
                   key: VAULT_SECRET_TOKEN
-          env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:

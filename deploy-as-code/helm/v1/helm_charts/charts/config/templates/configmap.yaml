@@ -64,7 +64,6 @@ data:
   spring.flyway.baseline-on-migrate: {{.Values.global.registry.migrationEnabled | quote}}
   autocreate.new.seq:  {{.Values.global.registry.autoCreateNewSeq | quote}}
   idformat.from.mdms: {{.Values.global.registry.idformatFromMdms | quote}}
-  egov.mdms.provider: {{.Values.global.registry.mdmsProvider | quote}}
   server.port: {{.Values.global.registry.encryption_port | quote}}
   server.servlet.context-path: {{.Values.global.registry.context-path | quote}}
   management.endpoints.web.base-path: {{.Values.global.registry.context-path | quote}}

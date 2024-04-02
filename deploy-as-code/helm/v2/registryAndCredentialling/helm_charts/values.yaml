@@ -40,7 +40,6 @@ global:
     encryption_port : 8013
     context-path : /
     idformatFromMdms: false
-    mdmsProvider: org.egov.id.masterdata.provider.DBMasterDataProvider
     autoCreateNewSeq: true
     migrationEnabled: true 
     did_enabled: true
@@ -80,4 +79,9 @@ global:
     MINIO_SECRET_KEY: Kgo=
     VAULT_SECRET_TOKEN: aHZzLioqKioqKioqKioqKioqKioqKioqKioqKg==
     DB_URL: e3tkYXRhYmFzZV90eXBlOnBvc3RncmVzfX06Ly97e2RhdGFic2VfdXNlbmFtZX19Ont7ZGF0YWJhc2VfcGFzc3dvcmR9fUB7e2RhdGFiYXNlX2hvc3Q6bG9jYWxob3N0fX06e3tkYXRhYmFzZV9wb3J0OjU0MzJ9fS97e2RhdGFiYXNlX25hbWU6c3VuYmlyZHJjfX0=
-
+encryption-service:
+    envVars:
+      egov_mdms_provider: org.egov.enc.masterdata.provider.DBMasterDataProvider
+id-gen-service:
+    envVars:
+      egov_mdms_provider: org.egov.id.masterdata.provider.DBMasterDataProvider

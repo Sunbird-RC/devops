@@ -73,3 +73,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+envVars:
+  egov_mdms_provider: 'org.egov.id.masterdata.provider.DBMasterDataProvider'
+

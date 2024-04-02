@@ -56,6 +56,10 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+
+envVars:
+  egov_mdms_provider: 'org.egov.id.masterdata.provider.DBMasterDataProvider'
+
 resources:
    requests:
      cpu: 500m

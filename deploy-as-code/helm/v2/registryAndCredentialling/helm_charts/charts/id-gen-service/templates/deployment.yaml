@@ -43,6 +43,13 @@ spec:
                 secretKeyRef:
                   name: rc-secret
                   key: DB_PASSWORD
+            - name: spring.flyway.password
+              valueFrom:
+                secretKeyRef:
+                  name: rc-secret
+                  key: DB_PASSWORD
+            - name: egov.mdms.provider
+              value: {{ .Values.envVars.egov_mdms_provider }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

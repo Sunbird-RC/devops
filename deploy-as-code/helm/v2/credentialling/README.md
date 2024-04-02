@@ -34,6 +34,7 @@ kubectl create ns demo-registry
 
 
 ## Vault Deployment 
+# (Chart version : 0.24.0 and vault image: hashicorp/vault:1.13.1) 
 
 We use hashicorp vault as the keystore (for ore details you can refer here : https://developer.hashicorp.com/vault )
 
