@@ -60,14 +60,6 @@ data:
   certificate_enabled: {{.Values.global.registry.certificate_enabled | quote}}
   encryption_enabled: {{.Values.global.registry.encryption_enabled | quote}}
   idgen_enabled: {{.Values.global.registry.idgen_enabled | quote}}
-  spring.datasource.url: jdbc:postgresql://{{.Values.global.database.host}}:{{.Values.global.database.port}}/{{.Values.global.registry.database}}
-  spring.flyway.url: jdbc:postgresql://{{.Values.global.database.host}}:{{.Values.global.database.port}}/{{.Values.global.registry.database}}
-  spring.flyway.baseline-on-migrate: {{.Values.global.registry.migrationEnabled | quote}}
-  autocreate.new.seq:  {{.Values.global.registry.autoCreateNewSeq | quote}}
-  idformat.from.mdms: {{.Values.global.registry.idformatFromMdms | quote}}
-  server.port: {{.Values.global.registry.encryption_port | quote}}
-  server.servlet.context-path: {{.Values.global.registry.context-path | quote}}
-  management.endpoints.web.base-path: {{.Values.global.registry.context-path | quote}}
   spring.datasource.username: {{.Values.global.database.user | quote}}
   IDENTITY_BASE_URL: http://{{ .Release.Name }}-identity-service:3332
   SCHEMA_BASE_URL: http://{{ .Release.Name }}-credential-schema-service:3333
