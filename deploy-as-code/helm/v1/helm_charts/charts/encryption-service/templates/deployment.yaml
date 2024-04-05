@@ -43,12 +43,25 @@ spec:
                 secretKeyRef:
                   name: rc-secret
                   key: DB_PASSWORD
-          env:
             - name: spring.flyway.password
               valueFrom:
                 secretKeyRef:
                   name: rc-secret
                   key: DB_PASSWORD         
+            - name: egov.mdms.provider
+              value: {{ .Values.envVars.egov_mdms_provider | quote}} 
+            - name: spring.datasource.url
+              value: {{ .Values.envVars.spring_datasource_url }}
+            - name: spring.flyway.url
+              value: {{ .Values.envVars.spring_flyway_url }}
+            - name: spring.flyway.baseline-on-migrate
+              value: {{ .Values.envVars.spring_flyway_baseline_on_migrate }}
+            - name: server.port
+              value: {{ .Values.envVars.server_port }}
+            - name: management.endpoints.web.base-path
+              value: {{ .Values.envVars.management_endpoints_web_base_path }}
+            - name: server.servlet.context-path
+              value: {{ .Values.envVars.server_servlet_context-path }}          
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
