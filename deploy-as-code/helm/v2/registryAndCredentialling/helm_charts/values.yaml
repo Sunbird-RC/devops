@@ -70,6 +70,7 @@ global:
     enable_auth: false 
     signing_algo: Ed25519
     jwks_uri: ""
+    qr_type : W3C_VC
   secrets:
     DB_PASSWORD: a2V5Y2xvYWs=
     ELASTIC_SEARCH_PASSWORD: ""

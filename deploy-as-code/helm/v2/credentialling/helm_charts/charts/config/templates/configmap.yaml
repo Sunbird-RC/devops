@@ -15,5 +15,5 @@ data:
   VAULT_TIMEOUT: {{.Values.global.vault.vault_timeout | quote}}
   VAULT_PROXY: {{.Values.global.vault.vault_proxy | quote}}
   SIGNING_ALGORITHM: {{.Values.global.sunbird.signing_algo | quote}}
-
+  QR_TYPE : {{.Values.global.sunbird.qr_type | quote}}
 
