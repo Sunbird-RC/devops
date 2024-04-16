@@ -4,6 +4,7 @@ global:
     enable_auth: false 
     signing_algo: Ed25519
     jwks_uri: ""
+    qr_type : W3C_VC
   vault: 
     address: http://vault:8200
     base_url: http://vault:8200/v1
