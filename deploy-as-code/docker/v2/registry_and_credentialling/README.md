@@ -38,7 +38,7 @@ docker compose version
 
 ## Installation
 
-- We have already created a .env file for basic setup. This configuration will help yous setup the basic verison of registry 2.0 for issuing credentials. If you want to customise any settings of registry you can edit the .env file or else you can go ahead with this configuration
+- We have already created a .env file for basic setup. This configuration will help your setup the basic verison of registry 2.0 for issuing credentials. If you want to customize any settings of the registry you can edit the .env file or else you can go ahead with this configuration
 
 - We are using Hashicorp vault as the keystore manager. You can know more about it [here](https://www.vaultproject.io/)
 
