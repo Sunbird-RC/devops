@@ -5,8 +5,10 @@ global:
     signing_algo: Ed25519
     jwks_uri: ""
     qr_type : W3C_VC
+    web_did_base_url: https://example.com/identifier
   vault: 
     address: http://vault:8200
+    token: hvs.*************
     base_url: http://vault:8200/v1
     root_path: http://vault:8200/v1/kv
     vault_timeout: 5000

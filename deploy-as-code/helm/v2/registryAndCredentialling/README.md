@@ -107,6 +107,18 @@ Convert all the passwords/secrets into base64 format and update these values in 
 ### Modify configuration values
 Configuration values like database address, elastic search address etc should be modified in values.yaml file.
 
+for example add the generated vault token as below in the values.yaml.
+
+```bash
+  vault: 
+    address: http://vault:8200
+    token: hvs.*************
+    base_url: http://vault:8200/v1
+    root_path: http://vault:8200/v1/kv
+    vault_timeout: 5000
+    vault_proxy: false
+```
+
 
 ### Schemas
 All schema files should be placed in the schemas directory located at `sunbird-rc-core/infra/helm_charts/charts/registry/schemas`.

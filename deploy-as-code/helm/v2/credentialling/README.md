@@ -98,6 +98,17 @@ Convert all the passwords/secrets into base64 format and update these values in 
 Configuration values related to vault address, base url and rootpath etc should be modified in values.yaml file.
 
 
+for example add the generated vault token as below in the values.yaml.
+
+```bash
+  vault: 
+    address: http://vault:8200
+    token: hvs.*************
+    base_url: http://vault:8200/v1
+    root_path: http://vault:8200/v1/kv
+    vault_timeout: 5000
+    vault_proxy: false
+```
 ### Deploy helm charts
 ```bash
 helm upgrade --install --namespace=demo-registry demo-registry helm_charts --create-namespace

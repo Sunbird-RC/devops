@@ -56,16 +56,6 @@ make compose-init
 - Create the schema files in the schemas directory. We have already provided example schemas (Official.json and Insurance.json)
 
 ### Steps to setup keycloak:
-- Start the database container
-
-```bash
-docker-compose up -d db
-```
-
-- Start the keycloak container
-```bash
-docker-compose up -d keycloak
-```
 
 - Open the keycloak admin console `http://localhost:8080/auth/`
 - Goto Clients -> admin-api -> Credentials
