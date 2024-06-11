@@ -91,6 +91,7 @@ data:
   signature_v2_get_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/{id}
   signature_v2_delete_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/{id}
   signature_v2_verify_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/{id}/verify
+  signature_v2_verify_any_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/verify
   signature_v2_revocation_list_url: http://{{ .Release.Name }}-credentials-service:3000/credentials/revocation-list?issuerId={issuerDid}&page={page}&limit={limit}
   signature_v2_schema_health_check_url: http://{{ .Release.Name }}-credential-schema-service:3333/health
   signature_v2_schema_create_url: http://{{ .Release.Name }}-credential-schema-service:3333/credential-schema
