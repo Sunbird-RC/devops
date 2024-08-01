@@ -65,7 +65,7 @@ spec:
             - name: management.endpoints.web.base-path
               value: {{ .Values.envVars.management_endpoints_web_base_path }}
             - name: server.servlet.context-path
-              value: {{ .Values.envVars.server_servlet_context-path }}
+              value: {{ .Values.envVars.server_servlet_context_path }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

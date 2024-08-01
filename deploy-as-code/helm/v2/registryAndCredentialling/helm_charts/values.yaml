@@ -88,7 +88,7 @@ encryption-service:
       spring_datasource_url: jdbc:postgresql://db:5432/registry
       spring_flyway_url: jdbc:postgresql://db:5432/registry
       server_port: 8013
-      server_servlet_context-path: /
+      server_servlet_context_path: /
       management_endpoints_web_base_path: /
       spring_flyway_baseline_on_migrate: true
 id-gen-service:
@@ -99,6 +99,6 @@ id-gen-service:
       idformat_from_mdms: false
       autocreate_new_seq:  true
       server_port: 8088
-      server_servlet_context-path: /
+      server_servlet_context_path: /
       management_endpoints_web_base_path: /
       spring_flyway_baseline_on_migrate: true
