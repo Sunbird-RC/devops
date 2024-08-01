@@ -69,7 +69,7 @@ global:
     vault_proxy: false
   sunbird: 
     enable_auth: false 
-    signing_algo: Ed25519
+    signing_algo: Ed25519Signature2020
     jwks_uri: ""
     qr_type : W3C_VC
     web_did_base_url: https://example.com/identifier
