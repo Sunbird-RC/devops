@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "credentials-service.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.global.service_type }}
+  type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: http

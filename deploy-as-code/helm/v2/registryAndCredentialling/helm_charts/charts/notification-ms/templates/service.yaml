@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "notification-ms.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.global.service_type }}
+  type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: http
