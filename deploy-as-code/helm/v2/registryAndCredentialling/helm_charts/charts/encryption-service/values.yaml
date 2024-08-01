@@ -81,4 +81,4 @@ envVars:
   server_port: 8013
   server_servlet_context_path: /
   management_endpoints_web_base_path: /
-  spring_flyway_baseline_on_migrate: true
+  spring_flyway_baseline_on_migrate: 'true'
