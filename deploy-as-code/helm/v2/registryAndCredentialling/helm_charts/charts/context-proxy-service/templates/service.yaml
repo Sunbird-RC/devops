@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "context-proxy-service.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.global.service_type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: http
