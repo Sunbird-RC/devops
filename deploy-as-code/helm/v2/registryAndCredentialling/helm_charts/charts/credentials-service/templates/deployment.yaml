@@ -42,7 +42,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: rc-secret
-                  key: DATABASE_URL
+                  key: CREDENTIALS_DATABASE_URL
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

@@ -63,6 +63,7 @@ data:
   encryption_enabled: {{.Values.global.registry.encryption_enabled | quote}}
   idgen_enabled: {{.Values.global.registry.idgen_enabled | quote}}
   spring.datasource.username: {{.Values.global.database.user | quote}}
+  spring.flyway.user: {{.Values.global.database.user | quote}}
   IDENTITY_BASE_URL: http://{{ .Release.Name }}-identity-service:3332
   SCHEMA_BASE_URL: http://{{ .Release.Name }}-credential-schema-service:3333
   CREDENTIAL_SERVICE_BASE_URL: http://{{ .Release.Name }}-credentials-service:3000

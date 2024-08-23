@@ -69,7 +69,7 @@ global:
     vault_proxy: false
   sunbird: 
     enable_auth: false 
-    signing_algo: Ed25519
+    signing_algo: Ed25519Signature2020
     jwks_uri: ""
     qr_type : W3C_VC
     web_did_base_url: https://example.com/identifier
@@ -81,14 +81,16 @@ global:
     KEYCLOAK_DEFAULT_USER_PASSWORD: YWRtaW5AMTIz
     MINIO_SECRET_KEY: Kgo=
     VAULT_SECRET_TOKEN: aHZzLioqKioqKioqKioqKioqKioqKioqKioqKg==
-    DB_URL: e3tkYXRhYmFzZV90eXBlOnBvc3RncmVzfX06Ly97e2RhdGFic2VfdXNlbmFtZX19Ont7ZGF0YWJhc2VfcGFzc3dvcmR9fUB7e2RhdGFiYXNlX2hvc3Q6bG9jYWxob3N0fX06e3tkYXRhYmFzZV9wb3J0OjU0MzJ9fS97e2RhdGFiYXNlX25hbWU6c3VuYmlyZHJjfX0=
+    CREDENTIALS_DB_URL: e3tkYXRhYmFzZV90eXBlOnBvc3RncmVzfX06Ly97e2RhdGFic2VfdXNlbmFtZX19Ont7ZGF0YWJhc2VfcGFzc3dvcmR9fUB7e2RhdGFiYXNlX2hvc3Q6bG9jYWxob3N0fX06e3tkYXRhYmFzZV9wb3J0OjU0MzJ9fS97e2RhdGFiYXNlX25hbWU6c3VuYmlyZHJjfX0=
+    CREDENTIAL_SCHEMA_DB_URL: e3tkYXRhYmFzZV90eXBlOnBvc3RncmVzfX06Ly97e2RhdGFic2VfdXNlbmFtZX19Ont7ZGF0YWJhc2VfcGFzc3dvcmR9fUB7e2RhdGFiYXNlX2hvc3Q6bG9jYWxob3N0fX06e3tkYXRhYmFzZV9wb3J0OjU0MzJ9fS97e2RhdGFiYXNlX25hbWU6c3VuYmlyZHJjfX0=
+    IDENTITY_DB_URL: e3tkYXRhYmFzZV90eXBlOnBvc3RncmVzfX06Ly97e2RhdGFic2VfdXNlbmFtZX19Ont7ZGF0YWJhc2VfcGFzc3dvcmR9fUB7e2RhdGFiYXNlX2hvc3Q6bG9jYWxob3N0fX06e3tkYXRhYmFzZV9wb3J0OjU0MzJ9fS97e2RhdGFiYXNlX25hbWU6c3VuYmlyZHJjfX0=
 encryption-service:
     envVars:
       egov_mdms_provider: org.egov.enc.masterdata.provider.DBMasterDataProvider
       spring_datasource_url: jdbc:postgresql://db:5432/registry
       spring_flyway_url: jdbc:postgresql://db:5432/registry
       server_port: 8013
-      server_servlet_context-path: /
+      server_servlet_context_path: /
       management_endpoints_web_base_path: /
       spring_flyway_baseline_on_migrate: true
 id-gen-service:
@@ -99,6 +101,6 @@ id-gen-service:
       idformat_from_mdms: false
       autocreate_new_seq:  true
       server_port: 8088
-      server_servlet_context-path: /
+      server_servlet_context_path: /
       management_endpoints_web_base_path: /
       spring_flyway_baseline_on_migrate: true
