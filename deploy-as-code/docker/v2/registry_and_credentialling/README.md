@@ -105,3 +105,27 @@ sudo rm -rf db-data/ vault-data/
 ## Postman_Collection 
 
 https://api.postman.com/collections/13315057-7e45f3d2-7232-4787-8cb7-72708bb122c1?access_key=PMAT-01HS0FYYFHFKJRP6AX1A0ETYBZ
+
+## OID4VC (optional)
+
+`oid4vc-service` is an OpenID4VCI / OpenID4VP protocol facade in front of `credential`,
+`identity` and `credential-schema`. It's gated behind a compose profile, so the base stack above
+is unaffected unless you opt in.
+
+- Start it after the base stack is up:
+
+```bash
+docker compose --profile oid4vc up -d oid4vc-service
+```
+
+- `OID4VC_PUBLIC_URL` (in `.env`) must be a host a wallet/phone can resolve — nginx does not
+  proxy the oid4vc routes, so this has to include the port (`http://<host>:3400`), not just
+  `localhost`. It feeds the QR deep link and the proof-of-possession `aud` claim, so a mismatch
+  fails PoP.
+- A credential schema is invisible to wallets until its `credential-schema` record has
+  `oid4vciConfig.oid4vciEnabled: true`.
+- Wallet-compat flags: set `OID4VC_DRAFT13_COMPAT=true` for MOSIP Inji Wallet, and
+  `OID4VP_LEGACY_CLIENT_ID_SCHEME=true` for walt.id.
+- `ENABLE_AUTH=true` together with the registry's `oid4vc_enabled=true` is a known-broken
+  combination — the registry sends no bearer token, so auto-offers fail silently.
+- Health check: `curl -f http://localhost:3400/health`.
