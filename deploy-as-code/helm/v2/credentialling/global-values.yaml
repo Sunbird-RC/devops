@@ -38,28 +38,11 @@ global:
     database: postgres
 
 # -----------------------------------------------------------------------------
-# Ingress controller (community ingress-nginx, dependency of this chart)
-# Receives traffic on the public IP and routes /identity-service etc.
-# Set enabled: false if the cluster already has an nginx ingress controller.
-# Note: community ingress-nginx is retired upstream (final release 4.15.1);
-# fine for dev, plan a replacement for production.
+# Ingress: none in this chart. The public IP / domain belongs to Spark's
+# nginx-public-ingress. Services are reached inside the cluster
+# (http://rc-identity-service:3332 etc.). For public access add routes in
+# Spark's nginx-public-ingress (or nginx-private-ingress for VNet-only).
 # -----------------------------------------------------------------------------
-ingress-nginx:
-  enabled: true
-  controller:
-    ingressClassResource:
-      name: nginx
-      # identity/schema/credentials charts use the old kubernetes.io/ingress.class
-      # annotation with empty className -> make nginx the default class (new cluster, only controller)
-      default: true
-    service:
-      type: LoadBalancer
-      annotations:
-        # Public IP that dev.sunbirded.org points to
-        service.beta.kubernetes.io/azure-load-balancer-ipv4: "4.213.202.52"
-        # Resource group that holds this public IP (needed if not in the MC_ node RG)
-        service.beta.kubernetes.io/azure-load-balancer-resource-group: "<IP_RESOURCE_GROUP>"
-        service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
 
 # -----------------------------------------------------------------------------
 # Image versions (same as docker RELEASE_VERSION)
@@ -67,14 +50,20 @@ ingress-nginx:
 identity-service:
   image:
     tag: "v2.1.0"
+  ingress:
+    enabled: false
 
 credential-schema-service:
   image:
     tag: "v2.1.0"
+  ingress:
+    enabled: false
 
 credentials-service:
   image:
     tag: "v2.1.0"
+  ingress:
+    enabled: false
 
 # -----------------------------------------------------------------------------
 # db (postgres) - compose "db" service
@@ -114,6 +103,8 @@ oid4vc-service:
   enabled: true
   image:
     tag: "v2.1.0"
+  ingress:
+    enabled: false
   env:
     PUBLIC_URL: ""                    # empty = http://<global.host>/oid4vc-service
     INTERNAL_URL: ""                  # empty = http://<release>-oid4vc-service:3400
