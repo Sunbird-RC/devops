@@ -4,6 +4,45 @@ This document explains how the credentialling services start, connect to each ot
 
 ---
 
+## 0. Folder structure
+
+Same layout as the Sunbird Spark installer:
+
+```
+deploy-as-code/helm/v2/credentialling/
+├── README.md                 ← this document
+├── install.sh                ← deploy script (install / template / status / uninstall)
+├── global-values.yaml        ← environment settings (host, DB password, auth, vault, oid4vc)
+├── images.yaml               ← every image + tag, mapped to each chart
+├── global-resources.yaml     ← cpu / memory / volume size per chart
+└── credentialling/           ← umbrella chart
+    ├── Chart.yaml
+    ├── values.yaml           ← chart defaults
+    └── charts/
+        ├── config/                     shared ConfigMap  <release>-config
+        ├── secrets/                    shared Secret     rc-secret
+        ├── vault/                      vault + setup Job + auto-unseal
+        ├── db/                         postgres
+        ├── identity-service/
+        ├── credential-schema-service/
+        ├── credentials-service/
+        └── oid4vc-service/
+```
+
+Deploy (from `deploy-as-code/helm/v2/credentialling`):
+
+```bash
+export DB_PASSWORD='<strong-password>'   # kept out of git
+./install.sh template    # dry run: lint + render to rendered.yaml
+./install.sh install     # checks tools, cluster access, permissions, then deploys
+./install.sh status      # pods, vault seal status, vault-keys secret
+./install.sh uninstall   # removes the release, keeps data volumes and vault-keys
+```
+
+`install.sh` runs `helm upgrade --install rc credentialling -f images.yaml -f global-resources.yaml -f global-values.yaml`. Later files override earlier ones, and all of them override the chart defaults in `credentialling/values.yaml` and `charts/*/values.yaml`. `RELEASE`, `NAMESPACE`, `TIMEOUT` and `VALUES_FILE` can be overridden with environment variables.
+
+---
+
 ## 1. The pieces
 
 | Component | What it does | Talks to |

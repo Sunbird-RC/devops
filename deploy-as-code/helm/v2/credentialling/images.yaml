@@ -1,0 +1,56 @@
+# =============================================================================
+# All container images for Sunbird RC credentialling (one place to change versions)
+# Passed to helm with: -f images.yaml
+# =============================================================================
+
+# All images defined with anchors
+images:
+  identity_service: &identity_service
+    repository: "ghcr.io/sunbird-rc/sunbird-rc-identity-service"
+    tag: "v2.1.0"
+
+  credential_schema_service: &credential_schema_service
+    repository: "ghcr.io/sunbird-rc/sunbird-rc-credential-schema"
+    tag: "v2.1.0"
+
+  credentials_service: &credentials_service
+    repository: "ghcr.io/sunbird-rc/sunbird-rc-credentials-service"
+    tag: "v2.1.0"
+
+  oid4vc_service: &oid4vc_service
+    repository: "ghcr.io/sunbird-rc/sunbird-rc-oid4vc-service"
+    tag: "v2.1.0"
+
+  vault: &vault
+    repository: "vault"
+    tag: "1.13.3"
+
+  postgres: &postgres
+    repository: "postgres"
+    tag: "18-alpine"
+
+  # used by the vault setup Job (needs kubectl + /bin/sh)
+  kubectl: &kubectl "alpine/k8s:1.34.13"
+
+# -----------------------------------------------------------------------------
+# Mapping: chart name -> image
+# -----------------------------------------------------------------------------
+identity-service:
+  image: *identity_service
+
+credential-schema-service:
+  image: *credential_schema_service
+
+credentials-service:
+  image: *credentials_service
+
+oid4vc-service:
+  image: *oid4vc_service
+
+vault:
+  image: *vault
+  setup:
+    kubectlImage: *kubectl
+
+db:
+  image: *postgres

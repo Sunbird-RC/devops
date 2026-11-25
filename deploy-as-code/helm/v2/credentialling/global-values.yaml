@@ -1,15 +1,18 @@
 # =============================================================================
-# Sunbird RC Credentialling - single input file for Helm v2
+# Sunbird RC Credentialling - environment inputs (equivalent of docker .env)
 #
-# Usage (from deploy-as-code/helm/v2/credentialling):
-#   helm upgrade --install rc ./helm_charts -f global-values.yaml
+# Install (from deploy-as-code/helm/v2/credentialling):
+#   helm upgrade --install rc credentialling -n sunbird --create-namespace \
+#     -f images.yaml -f global-resources.yaml -f global-values.yaml --timeout 15m
 #
-# Equivalent of docker/v2/credentialling/.env
-# Do NOT commit real passwords / tokens. Keep a filled copy outside git.
+# images.yaml           -> image versions
+# global-resources.yaml -> cpu / memory / volume sizes
+# global-values.yaml    -> this file: environment settings
+#
+# Do NOT commit real passwords. Keep a filled copy outside git.
 # =============================================================================
 
 global:
-  # Ingress host for all services (identity, schema, credentials, oid4vc)
   host: "dev.sunbirded.org"
 
   sunbird:
@@ -19,80 +22,52 @@ global:
     qr_type: W3C_VC                  # QR_TYPE
     web_did_base_url: "https://example.com/identifier"   # WEB_DID_BASE_URL
 
-  # Vault runs in-cluster (vault chart). Service name "vault" -> keep as is.
+  # Vault runs in-cluster (vault chart), service name "vault".
+  # No token here - the vault-setup Job creates it and writes it into
+  # rc-secret (VAULT_SECRET_TOKEN) automatically.
   vault:
     address: "http://vault:8200"           # VAULT_ADDR
     base_url: "http://vault:8200/v1"       # VAULT_BASE_URL
-    root_path: "http://vault:8200/v1/kv"   # VAULT_ROOT_PATH ("kv" = setup Job kvPath)
+    root_path: "http://vault:8200/v1/kv"   # VAULT_ROOT_PATH
     vault_timeout: 5000                    # VAULT_TIMEOUT
     vault_proxy: false                     # VAULT_PROXY
-    # No vault token here - the vault-setup Job creates it and writes it
-    # into rc-secret (VAULT_SECRET_TOKEN) automatically.
 
   # Postgres credentials - used by the db chart (POSTGRES_USER/PASSWORD)
-  # and by the secrets chart to build DATABASE_URL automatically:
+  # and by the secrets chart to build DATABASE_URL:
   #   postgres://<username>:<password>@db:5432/<database>
   db:
     username: postgres
-    password: "<DB_PASSWORD>"         # only input needed
+    password: "<DB_PASSWORD>"         # only required input
     database: postgres
 
 # -----------------------------------------------------------------------------
-# Ingress: none in this chart. The public IP / domain belongs to Spark's
-# nginx-public-ingress. Services are reached inside the cluster
-# (http://rc-identity-service:3332 etc.). For public access add routes in
-# Spark's nginx-public-ingress (or nginx-private-ingress for VNet-only).
-# -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# Image versions (same as docker RELEASE_VERSION)
+# Ingress: none. Services are cluster-internal
+# (http://rc-identity-service:3332 etc.). The public IP / domain belongs to
+# Spark's nginx-public-ingress; add routes there for public access.
 # -----------------------------------------------------------------------------
 identity-service:
-  image:
-    tag: "v2.1.0"
   ingress:
     enabled: false
 
 credential-schema-service:
-  image:
-    tag: "v2.1.0"
   ingress:
     enabled: false
 
 credentials-service:
-  image:
-    tag: "v2.1.0"
   ingress:
     enabled: false
 
 # -----------------------------------------------------------------------------
-# db (postgres) - compose "db" service
-# -----------------------------------------------------------------------------
-db:
-  image:
-    tag: "18-alpine"
-  # credentials: see global.db above
-  persistence:
-    size: 8Gi
-    storageClass: ""                  # empty = cluster default
-
-# -----------------------------------------------------------------------------
-# vault - compose "vault" service + setup_vault.sh (automatic)
+# vault - setup Job replaces setup_vault.sh (init, unseal, kv, token)
 # -----------------------------------------------------------------------------
 vault:
-  image:
-    tag: "1.13.3"
-  persistence:
-    size: 1Gi
-    storageClass: ""
   setup:
-    enabled: true                     # init + unseal + enable kv + token -> rc-secret
+    enabled: true
     keyShares: 5
     keyThreshold: 3
     kvPath: kv
-    keysSecretName: vault-keys        # unseal keys + root token stored here (= keys.txt)
+    keysSecretName: vault-keys        # unseal keys + root token (= keys.txt)
     restartDeployments: []            # empty = <release>-identity-service
-    kubectlImage: alpine/k8s:1.34.13
   autoUnseal:
     enabled: true                     # unseal automatically after vault pod restart
 
@@ -101,8 +76,6 @@ vault:
 # -----------------------------------------------------------------------------
 oid4vc-service:
   enabled: true
-  image:
-    tag: "v2.1.0"
   ingress:
     enabled: false
   env:
