@@ -38,6 +38,30 @@ global:
     database: postgres
 
 # -----------------------------------------------------------------------------
+# Ingress controller (community ingress-nginx, dependency of this chart)
+# Receives traffic on the public IP and routes /identity-service etc.
+# Set enabled: false if the cluster already has an nginx ingress controller.
+# Note: community ingress-nginx is retired upstream (final release 4.15.1);
+# fine for dev, plan a replacement for production.
+# -----------------------------------------------------------------------------
+ingress-nginx:
+  enabled: true
+  controller:
+    ingressClassResource:
+      name: nginx
+      # identity/schema/credentials charts use the old kubernetes.io/ingress.class
+      # annotation with empty className -> make nginx the default class (new cluster, only controller)
+      default: true
+    service:
+      type: LoadBalancer
+      annotations:
+        # Public IP that dev.sunbirded.org points to
+        service.beta.kubernetes.io/azure-load-balancer-ipv4: "4.213.202.52"
+        # Resource group that holds this public IP (needed if not in the MC_ node RG)
+        service.beta.kubernetes.io/azure-load-balancer-resource-group: "<IP_RESOURCE_GROUP>"
+        service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
+
+# -----------------------------------------------------------------------------
 # Image versions (same as docker RELEASE_VERSION)
 # -----------------------------------------------------------------------------
 identity-service:
@@ -79,7 +103,7 @@ vault:
     kvPath: kv
     keysSecretName: vault-keys        # unseal keys + root token stored here (= keys.txt)
     restartDeployments: []            # empty = <release>-identity-service
-    kubectlImage: bitnami/kubectl:1.29
+    kubectlImage: alpine/k8s:1.34.13
   autoUnseal:
     enabled: true                     # unseal automatically after vault pod restart
 

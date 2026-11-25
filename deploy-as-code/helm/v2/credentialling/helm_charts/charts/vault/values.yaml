@@ -37,7 +37,8 @@ setup:
   kvPath: kv
   # Deployments restarted when the token changes. Empty = <release>-identity-service
   restartDeployments: []
-  kubectlImage: bitnami/kubectl:1.29
+  # Needs kubectl + /bin/sh + base64. (bitnami/kubectl versioned tags were removed in 2025)
+  kubectlImage: alpine/k8s:1.34.13
 
 # Sidecar that unseals vault after a pod restart using keys from the Secret
 # (setup_vault.sh does not do this; in docker you re-run it by hand).
