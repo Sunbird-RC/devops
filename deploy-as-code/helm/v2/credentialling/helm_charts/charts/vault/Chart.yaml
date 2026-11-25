@@ -1,0 +1,6 @@
+apiVersion: v2
+name: vault
+description: Vault for Sunbird RC credentialling - same as the vault service + setup_vault.sh in docker/v2/credentialling
+type: application
+version: 0.0.1
+appVersion: "1.13.3"

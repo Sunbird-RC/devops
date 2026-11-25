@@ -1,0 +1,130 @@
+{{- if .Values.setup.enabled }}
+{{- $restart := .Values.setup.restartDeployments }}
+{{- if not $restart }}{{- $restart = list (printf "%s-identity-service" .Release.Name) }}{{- end }}
+# Kubernetes version of setup_vault.sh (docker/v2/credentialling).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-setup
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      serviceAccountName: vault-setup
+      restartPolicy: OnFailure
+      volumes:
+        - name: work
+          emptyDir:
+            medium: Memory
+      initContainers:
+        # Step 1: wait for vault, run "vault operator init" only if not initialised yet
+        - name: init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            - name: VAULT_ADDR
+              value: "http://vault:{{ .Values.service.port }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              mkdir -p /work/keys
+              echo "waiting for vault..."
+              while true; do
+                rc=0; vault status >/dev/null 2>&1 || rc=$?
+                [ "$rc" -ne 1 ] && break
+                sleep 2
+              done
+              if vault status | grep -q 'Initialized *true'; then
+                echo "vault already initialized"
+              else
+                echo "initializing vault"
+                vault operator init -key-shares={{ .Values.setup.keyShares }} -key-threshold={{ .Values.setup.keyThreshold }} \
+                  | sed 's/\x1B\[[0-9;]*[JKmsu]//g' > /work/init.txt
+                for i in $(seq 1 {{ .Values.setup.keyShares }}); do
+                  sed -n "s/^Unseal Key $i: //p" /work/init.txt | tr -dc '[:print:]' > /work/keys/unseal_key_$i
+                done
+                sed -n 's/^Initial Root Token: //p' /work/init.txt | tr -dc '[:print:]' > /work/keys/root_token
+                rm -f /work/init.txt
+                [ -s /work/keys/root_token ] || { echo "init output not parsed"; exit 1; }
+                touch /work/fresh
+              fi
+          volumeMounts:
+            - name: work
+              mountPath: /work
+        # Step 2: save keys in Secret (first time) or load them from Secret (later runs)
+        - name: keys
+          image: {{ .Values.setup.kubectlImage }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              S={{ .Values.setup.keysSecretName }}
+              if [ -f /work/fresh ]; then
+                echo "saving unseal keys + root token to Secret $S"
+                kubectl create secret generic "$S" --from-file=/work/keys/
+              else
+                echo "loading keys from Secret $S"
+                kubectl get secret "$S" >/dev/null || { echo "vault is initialized but Secret $S is missing"; exit 1; }
+                for k in $(seq 1 {{ .Values.setup.keyShares }}); do
+                  kubectl get secret "$S" -o jsonpath="{.data.unseal_key_$k}" | base64 -d > /work/keys/unseal_key_$k
+                done
+                kubectl get secret "$S" -o jsonpath='{.data.root_token}' | base64 -d > /work/keys/root_token
+              fi
+          volumeMounts:
+            - name: work
+              mountPath: /work
+        # Step 3: unseal + enable kv-v2 (same as setup_vault.sh)
+        - name: unseal
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            - name: VAULT_ADDR
+              value: "http://vault:{{ .Values.service.port }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              rc=0; vault status >/dev/null 2>&1 || rc=$?
+              if [ "$rc" -eq 2 ]; then
+                echo "unsealing vault"
+                for i in $(seq 1 {{ .Values.setup.keyThreshold }}); do
+                  vault operator unseal "$(cat /work/keys/unseal_key_$i)" >/dev/null
+                done
+              fi
+              export VAULT_TOKEN="$(cat /work/keys/root_token)"
+              if vault secrets list | grep -q '^{{ .Values.setup.kvPath }}/'; then
+                echo "kv engine already enabled"
+              else
+                echo "enabling kv-v2 at {{ .Values.setup.kvPath }}"
+                vault secrets enable -path={{ .Values.setup.kvPath }} kv-v2
+              fi
+          volumeMounts:
+            - name: work
+              mountPath: /work
+      containers:
+        # Step 4: put root token in rc-secret (identity-service VAULT_TOKEN), restart if changed
+        - name: publish-token
+          image: {{ .Values.setup.kubectlImage }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              TOKEN="$(cat /work/keys/root_token)"
+              CURRENT="$(kubectl get secret {{ .Values.setup.appSecretName }} -o jsonpath='{.data.{{ .Values.setup.appSecretKey }}}' | base64 -d || true)"
+              if [ "$TOKEN" = "$CURRENT" ]; then
+                echo "{{ .Values.setup.appSecretName }} already has the vault token"
+                exit 0
+              fi
+              echo "updating {{ .Values.setup.appSecretName }}/{{ .Values.setup.appSecretKey }}"
+              kubectl patch secret {{ .Values.setup.appSecretName }} --type merge \
+                -p "{\"stringData\":{\"{{ .Values.setup.appSecretKey }}\":\"$TOKEN\"}}"
+              {{- range $restart }}
+              kubectl rollout restart deployment/{{ . }} || echo "could not restart {{ . }}"
+              {{- end }}
+          volumeMounts:
+            - name: work
+              mountPath: /work
+{{- end }}

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: db
+description: PostgreSQL for Sunbird RC credentialling - same role as the "db" service in docker/v2/credentialling
+type: application
+version: 0.0.1
+appVersion: "18"

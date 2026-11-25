@@ -1,0 +1,104 @@
+# =============================================================================
+# Sunbird RC Credentialling - single input file for Helm v2
+#
+# Usage (from deploy-as-code/helm/v2/credentialling):
+#   helm upgrade --install rc ./helm_charts -f global-values.yaml
+#
+# Equivalent of docker/v2/credentialling/.env
+# Do NOT commit real passwords / tokens. Keep a filled copy outside git.
+# =============================================================================
+
+global:
+  # Ingress host for all services (identity, schema, credentials, oid4vc)
+  host: "dev.sunbirded.org"
+
+  sunbird:
+    enable_auth: false               # ENABLE_AUTH
+    jwks_uri: ""                     # JWKS_URI (required if enable_auth: true)
+    signing_algo: Ed25519            # SIGNING_ALGORITHM
+    qr_type: W3C_VC                  # QR_TYPE
+    web_did_base_url: "https://example.com/identifier"   # WEB_DID_BASE_URL
+
+  # Vault runs in-cluster (vault chart). Service name "vault" -> keep as is.
+  vault:
+    address: "http://vault:8200"           # VAULT_ADDR
+    base_url: "http://vault:8200/v1"       # VAULT_BASE_URL
+    root_path: "http://vault:8200/v1/kv"   # VAULT_ROOT_PATH ("kv" = setup Job kvPath)
+    vault_timeout: 5000                    # VAULT_TIMEOUT
+    vault_proxy: false                     # VAULT_PROXY
+    # No vault token here - the vault-setup Job creates it and writes it
+    # into rc-secret (VAULT_SECRET_TOKEN) automatically.
+
+  # Postgres credentials - used by the db chart (POSTGRES_USER/PASSWORD)
+  # and by the secrets chart to build DATABASE_URL automatically:
+  #   postgres://<username>:<password>@db:5432/<database>
+  db:
+    username: postgres
+    password: "<DB_PASSWORD>"         # only input needed
+    database: postgres
+
+# -----------------------------------------------------------------------------
+# Image versions (same as docker RELEASE_VERSION)
+# -----------------------------------------------------------------------------
+identity-service:
+  image:
+    tag: "v2.1.0"
+
+credential-schema-service:
+  image:
+    tag: "v2.1.0"
+
+credentials-service:
+  image:
+    tag: "v2.1.0"
+
+# -----------------------------------------------------------------------------
+# db (postgres) - compose "db" service
+# -----------------------------------------------------------------------------
+db:
+  image:
+    tag: "18-alpine"
+  # credentials: see global.db above
+  persistence:
+    size: 8Gi
+    storageClass: ""                  # empty = cluster default
+
+# -----------------------------------------------------------------------------
+# vault - compose "vault" service + setup_vault.sh (automatic)
+# -----------------------------------------------------------------------------
+vault:
+  image:
+    tag: "1.13.3"
+  persistence:
+    size: 1Gi
+    storageClass: ""
+  setup:
+    enabled: true                     # init + unseal + enable kv + token -> rc-secret
+    keyShares: 5
+    keyThreshold: 3
+    kvPath: kv
+    keysSecretName: vault-keys        # unseal keys + root token stored here (= keys.txt)
+    restartDeployments: []            # empty = <release>-identity-service
+    kubectlImage: bitnami/kubectl:1.29
+  autoUnseal:
+    enabled: true                     # unseal automatically after vault pod restart
+
+# -----------------------------------------------------------------------------
+# oid4vc-service - compose "oid4vc-service" (profile oid4vc)
+# -----------------------------------------------------------------------------
+oid4vc-service:
+  enabled: true
+  image:
+    tag: "v2.1.0"
+  env:
+    PUBLIC_URL: ""                    # empty = http://<global.host>/oid4vc-service
+    INTERNAL_URL: ""                  # empty = http://<release>-oid4vc-service:3400
+    SESSION_STORE: "memory"           # memory | redis
+    REDIS_URL: ""                     # needed only if SESSION_STORE=redis
+    ISSUER_DID: ""
+    VERIFIER_DID: ""
+    OID4VP_ENABLED: "true"
+    DRAFT13_COMPAT_MODE: "false"
+    OID4VP_SIGN_REQUEST: "false"
+    OID4VP_LEGACY_CLIENT_ID_SCHEME: "false"
+    AUTH_ISSUER: ""

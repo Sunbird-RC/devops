@@ -1,0 +1,32 @@
+{{- if .Values.setup.enabled }}
+# Permissions for the setup job: manage the keys Secret, update rc-secret, restart identity-service.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-setup
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: vault-setup
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: vault-setup
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: vault-setup
+subjects:
+  - kind: ServiceAccount
+    name: vault-setup
+    namespace: {{ .Release.Namespace }}
+{{- end }}

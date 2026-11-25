@@ -1,0 +1,6 @@
+apiVersion: v2
+name: oid4vc-service
+description: Sunbird RC OID4VC service (OpenID4VCI issuance / OID4VP verification) - mirrors oid4vc-service in docker/v2/credentialling
+type: application
+version: 0.0.1
+appVersion: "v2.1.0"

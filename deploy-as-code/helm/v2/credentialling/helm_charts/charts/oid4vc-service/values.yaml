@@ -1,0 +1,50 @@
+# Optional in docker-compose (profile "oid4vc"). Set to false to skip deploying it.
+enabled: true
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/sunbird-rc/sunbird-rc-oid4vc-service
+  pullPolicy: IfNotPresent
+  tag: "v2.1.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 3400
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  path: /oid4vc-service(/|$)(.*)
+  pathType: ImplementationSpecific
+  tls: []
+
+# Same env vars as docker-compose oid4vc-service. Empty = docker default.
+# IDENTITY_BASE_URL, SCHEMA_BASE_URL, CREDENTIAL_SERVICE_BASE_URL, ENABLE_AUTH, JWKS_URI
+# come from the shared "<release>-config" ConfigMap (config chart).
+env:
+  # URL wallets use to reach this service. Default: http://<global.host>/oid4vc-service
+  PUBLIC_URL: ""
+  # Default: http://<release>-oid4vc-service:3400
+  INTERNAL_URL: ""
+  # "memory" or "redis". With "redis", set REDIS_URL (no redis in this chart, same as docker).
+  SESSION_STORE: "memory"
+  REDIS_URL: ""
+  ISSUER_DID: ""
+  VERIFIER_DID: ""
+  OID4VP_ENABLED: "true"
+  DRAFT13_COMPAT_MODE: "false"
+  OID4VP_SIGN_REQUEST: "false"
+  OID4VP_LEGACY_CLIENT_ID_SCHEME: "false"
+  AUTH_ISSUER: ""
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

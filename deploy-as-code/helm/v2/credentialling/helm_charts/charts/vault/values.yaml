@@ -1,0 +1,46 @@
+# Same as docker-compose "vault" service (docker/v2/credentialling)
+image:
+  repository: vault
+  tag: "1.13.3"
+  pullPolicy: IfNotPresent
+
+# Service name is fixed to "vault" so global.vault.address (http://vault:8200)
+# works, same as the compose service name.
+service:
+  type: ClusterIP
+  port: 8200
+
+# Same as ./data/vault-data:/vault/file in compose
+persistence:
+  size: 1Gi
+  storageClass: ""
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Replaces setup_vault.sh. Runs as a Helm hook after install/upgrade:
+#  1. vault operator init (only first time) -> keys + root token saved in Secret "vault-keys"
+#  2. unseal with 3 keys
+#  3. enable kv-v2 at path "kv"
+#  4. copy root token into rc-secret (VAULT_SECRET_TOKEN) -> identity-service VAULT_TOKEN
+#  5. restart identity-service if the token changed
+setup:
+  enabled: true
+  keysSecretName: vault-keys
+  # Secret created by the "secrets" chart, read by identity-service
+  appSecretName: rc-secret
+  appSecretKey: VAULT_SECRET_TOKEN
+  keyShares: 5
+  keyThreshold: 3
+  kvPath: kv
+  # Deployments restarted when the token changes. Empty = <release>-identity-service
+  restartDeployments: []
+  kubectlImage: bitnami/kubectl:1.29
+
+# Sidecar that unseals vault after a pod restart using keys from the Secret
+# (setup_vault.sh does not do this; in docker you re-run it by hand).
+autoUnseal:
+  enabled: true
+  intervalSeconds: 10
