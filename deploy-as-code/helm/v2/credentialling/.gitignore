@@ -1,4 +1,4 @@
 # output of ./install.sh template - contains rendered secrets
 rendered.yaml
 # downloaded chart dependencies
-credentialling/charts/*.tgz
+charts/*.tgz

@@ -26,13 +26,14 @@ ok()   { echo -e "\033[1;32m  ✓\033[0m $*"; }
 warn() { echo -e "\033[1;33m  !\033[0m $*"; }
 die()  { echo -e "\033[1;31mERROR:\033[0m $*" >&2; exit 1; }
 
-# Umbrella chart folder (supports the old name until it is renamed)
-if [[ -d "$SCRIPT_DIR/credentialling" ]]; then
-  CHART="$SCRIPT_DIR/credentialling"
-elif [[ -d "$SCRIPT_DIR/helm_charts" ]]; then
+# Umbrella chart lives in this folder (Chart.yaml next to this script).
+# Falls back to the old ./helm_charts layout until the files are moved up.
+if [[ -f "$SCRIPT_DIR/Chart.yaml" ]]; then
+  CHART="$SCRIPT_DIR"
+elif [[ -f "$SCRIPT_DIR/helm_charts/Chart.yaml" ]]; then
   CHART="$SCRIPT_DIR/helm_charts"
 else
-  die "umbrella chart folder not found (expected ./credentialling)"
+  die "Chart.yaml not found next to install.sh"
 fi
 
 TMP_DIR="$(mktemp -d)"

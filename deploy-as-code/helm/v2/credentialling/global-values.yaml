@@ -1,9 +1,9 @@
 # =============================================================================
 # Sunbird RC Credentialling - environment inputs (equivalent of docker .env)
 #
-# Install (from deploy-as-code/helm/v2/credentialling):
-#   helm upgrade --install rc credentialling -n sunbird --create-namespace \
-#     -f images.yaml -f global-resources.yaml -f global-values.yaml --timeout 15m
+# Deploy (from deploy-as-code/helm/v2/credentialling):
+#   export DB_PASSWORD='<strong-password>'
+#   ./install.sh install
 #
 # images.yaml           -> image versions
 # global-resources.yaml -> cpu / memory / volume sizes

@@ -1,0 +1,19 @@
+# Not part of the chart package - deploy tooling and environment inputs
+install.sh
+README.md
+FLOW.md
+images.yaml
+global-resources.yaml
+global-values.yaml
+rendered.yaml
+.gitignore
+.helmignore
+helm_charts/
+# Common VCS / editor files
+.git/
+.DS_Store
+*.swp
+*.bak
+*.tmp
+.vscode/
+.idea/
