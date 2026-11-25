@@ -2,7 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "credential-schema-service.fullname" . }}
-  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "credential-schema-service.labels" . | nindent 4 }}
 spec:

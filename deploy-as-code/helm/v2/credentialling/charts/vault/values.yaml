@@ -24,14 +24,14 @@ affinity: {}
 #  1. vault operator init (only first time) -> keys + root token saved in Secret "vault-keys"
 #  2. unseal with 3 keys
 #  3. enable kv-v2 at path "kv"
-#  4. copy root token into rc-secret (VAULT_SECRET_TOKEN) -> identity-service VAULT_TOKEN
+#  4. write root token to Secret "vault-token" (identity-service reads VAULT_TOKEN from it)
 #  5. restart identity-service if the token changed
 setup:
   enabled: true
   keysSecretName: vault-keys
-  # Secret created by the "secrets" chart, read by identity-service
-  appSecretName: rc-secret
-  appSecretKey: VAULT_SECRET_TOKEN
+  # Secret holding the token for identity-service (must match identity-service.vaultToken)
+  tokenSecretName: vault-token
+  tokenSecretKey: VAULT_TOKEN
   keyShares: 5
   keyThreshold: 3
   kvPath: kv

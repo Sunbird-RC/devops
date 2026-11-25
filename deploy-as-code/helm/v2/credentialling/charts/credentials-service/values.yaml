@@ -1,75 +1,40 @@
-# Default values for credentials-service.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 replicaCount: 1
 
 image:
   repository: ghcr.io/sunbird-rc/sunbird-rc-credentials-service
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "v2.0.0"
+  # empty = Chart appVersion. Set versions in images.yaml.
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: false
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-podAnnotations: {}
-
-podSecurityContext: {}
-# fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-# runAsUser: 1000
-
 service:
   type: ClusterIP
   port: 3000
 
+# Ports of the services this one calls
+identityPort: 3332
+schemaPort: 3333
+
+# CREDENTIAL_SERVICE_BASE_URL. Empty = http://<release>-credentials-service:3000 (cluster-internal).
+# Set to the public URL if credentials must carry externally reachable links.
+credentialServiceBaseUrl: ""
+
 ingress:
-  enabled: true
-  className: ""
+  enabled: false
+  className: nginx
   annotations:
-   kubernetes.io/ingress.class: nginx
-   nginx.ingress.kubernetes.io/rewrite-target: /$2
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - paths:
-        - path: /credentials-service(/|$)(.*)
-          pathType: ImplementationSpecific
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  path: /credentials-service(/|$)(.*)
+  pathType: ImplementationSpecific
   tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
-resources:
-  requests:
-    cpu: 500m
-    memory: 2G
+# Extra env vars added to this service's ConfigMap
+extraEnv: {}
 
-autoscaling:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 1
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
+resources: {}
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}

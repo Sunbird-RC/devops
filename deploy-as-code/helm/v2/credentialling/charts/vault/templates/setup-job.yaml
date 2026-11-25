@@ -105,22 +105,25 @@ spec:
             - name: work
               mountPath: /work
       containers:
-        # Step 4: put root token in rc-secret (identity-service VAULT_TOKEN), restart if changed
+        # Step 4: put root token in its own Secret (identity-service reads VAULT_TOKEN from it),
+        # restart identity if the token changed
         - name: publish-token
           image: {{ .Values.setup.kubectlImage }}
           command: ["/bin/sh", "-c"]
           args:
             - |
               set -e
+              S={{ .Values.setup.tokenSecretName }}
+              K={{ .Values.setup.tokenSecretKey }}
               TOKEN="$(cat /work/keys/root_token)"
-              CURRENT="$(kubectl get secret {{ .Values.setup.appSecretName }} -o jsonpath='{.data.{{ .Values.setup.appSecretKey }}}' | base64 -d || true)"
+              CURRENT="$(kubectl get secret "$S" -o jsonpath="{.data.$K}" 2>/dev/null | base64 -d 2>/dev/null || true)"
               if [ "$TOKEN" = "$CURRENT" ]; then
-                echo "{{ .Values.setup.appSecretName }} already has the vault token"
+                echo "Secret $S already has the vault token"
                 exit 0
               fi
-              echo "updating {{ .Values.setup.appSecretName }}/{{ .Values.setup.appSecretKey }}"
-              kubectl patch secret {{ .Values.setup.appSecretName }} --type merge \
-                -p "{\"stringData\":{\"{{ .Values.setup.appSecretKey }}\":\"$TOKEN\"}}"
+              echo "writing vault token to Secret $S"
+              kubectl create secret generic "$S" --from-literal="$K=$TOKEN" \
+                --dry-run=client -o yaml | kubectl apply -f -
               {{- range $restart }}
               kubectl rollout restart deployment/{{ . }} || echo "could not restart {{ . }}"
               {{- end }}

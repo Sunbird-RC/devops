@@ -1,0 +1,21 @@
+{{- $g := .Values.global }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "identity-service.fullname" . }}
+  labels:
+    {{- include "identity-service.labels" . | nindent 4 }}
+data:
+  # same env as the "identity" service in docker/v2/credentialling/docker-compose.yml
+  VAULT_ADDR: {{ $g.vault.address | quote }}
+  VAULT_BASE_URL: {{ $g.vault.base_url | quote }}
+  VAULT_ROOT_PATH: {{ $g.vault.root_path | quote }}
+  VAULT_TIMEOUT: {{ $g.vault.vault_timeout | quote }}
+  VAULT_PROXY: {{ $g.vault.vault_proxy | quote }}
+  SIGNING_ALGORITHM: {{ $g.sunbird.signing_algo | quote }}
+  WEB_DID_BASE_URL: {{ $g.sunbird.web_did_base_url | quote }}
+  ENABLE_AUTH: {{ $g.sunbird.enable_auth | quote }}
+  JWKS_URI: {{ $g.sunbird.jwks_uri | quote }}
+  {{- range $k, $v := .Values.extraEnv }}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}

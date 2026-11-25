@@ -167,10 +167,10 @@ cmd_uninstall() {
   check_tools
   log "Uninstalling release '$RELEASE' from '$NAMESPACE'"
   helm uninstall "$RELEASE" -n "$NAMESPACE"
-  warn "Kept on purpose: PVCs (data-vault-0, data-db-0) and Secret vault-keys."
+  warn "Kept on purpose: PVCs (data-vault-0, data-db-0) and Secrets vault-keys, vault-token."
   warn "Deleting them PERMANENTLY destroys all data and vault keys:"
   echo "    kubectl delete pvc data-vault-0 data-db-0 -n $NAMESPACE"
-  echo "    kubectl delete secret vault-keys -n $NAMESPACE"
+  echo "    kubectl delete secret vault-keys vault-token -n $NAMESPACE"
 }
 
 usage() {

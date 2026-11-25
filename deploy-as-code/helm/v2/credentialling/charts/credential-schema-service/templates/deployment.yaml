@@ -2,22 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "credential-schema-service.fullname" . }}
-  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "credential-schema-service.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "credential-schema-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        # restart pods when config or DB secret changes
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       labels:
         {{- include "credential-schema-service.selectorLabels" . | nindent 8 }}
     spec:
@@ -25,24 +22,15 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "credential-schema-service.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: "{{ .Release.Name }}-config"
-          env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: rc-secret
-                  key: DATABASE_URL
+                name: {{ include "credential-schema-service.fullname" . }}
+            - secretRef:
+                name: {{ include "credential-schema-service.fullname" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -50,14 +38,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{ .Values.service.port }}
-            failureThreshold: 20
-            periodSeconds: 30
-            timeoutSeconds: 10
+              port: http
             initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 20
           livenessProbe:
             tcpSocket:
-              port: {{ .Values.service.port }}
+              port: http
             initialDelaySeconds: 15
             periodSeconds: 30
             failureThreshold: 20

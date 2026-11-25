@@ -1,5 +1,4 @@
 {{- if .Values.enabled }}
-{{- $cm := printf "%s-config" .Release.Name }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,14 +30,17 @@ spec:
               value: {{ .Values.env.PUBLIC_URL | default (printf "http://%s/oid4vc-service" (.Values.global.host | default "localhost")) | quote }}
             - name: INTERNAL_URL
               value: {{ .Values.env.INTERNAL_URL | default (printf "http://%s:%v" (include "oid4vc-service.fullname" .) .Values.service.port) | quote }}
-            # Shared values from the config chart ConfigMap (picked by key so vault settings are not exposed here)
-            {{- range $key := list "IDENTITY_BASE_URL" "SCHEMA_BASE_URL" "CREDENTIAL_SERVICE_BASE_URL" "ENABLE_AUTH" "JWKS_URI" }}
-            - name: {{ $key }}
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $cm }}
-                  key: {{ $key }}
-            {{- end }}
+            # URLs of the other services (same as docker-compose oid4vc-service)
+            - name: IDENTITY_BASE_URL
+              value: {{ printf "http://%s-identity-service:3332" .Release.Name | quote }}
+            - name: SCHEMA_BASE_URL
+              value: {{ printf "http://%s-credential-schema-service:3333" .Release.Name | quote }}
+            - name: CREDENTIAL_SERVICE_BASE_URL
+              value: {{ printf "http://%s-credentials-service:3000" .Release.Name | quote }}
+            - name: ENABLE_AUTH
+              value: {{ .Values.global.sunbird.enable_auth | quote }}
+            - name: JWKS_URI
+              value: {{ .Values.global.sunbird.jwks_uri | quote }}
             {{- range $key, $val := .Values.env }}
             {{- if and (ne $key "PUBLIC_URL") (ne $key "INTERNAL_URL") }}
             - name: {{ $key }}

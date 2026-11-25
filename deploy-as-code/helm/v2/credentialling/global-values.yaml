@@ -23,8 +23,8 @@ global:
     web_did_base_url: "https://example.com/identifier"   # WEB_DID_BASE_URL
 
   # Vault runs in-cluster (vault chart), service name "vault".
-  # No token here - the vault-setup Job creates it and writes it into
-  # rc-secret (VAULT_SECRET_TOKEN) automatically.
+  # No token here - the vault-setup Job creates it and stores it in
+  # Secret "vault-token", which identity-service reads as VAULT_TOKEN.
   vault:
     address: "http://vault:8200"           # VAULT_ADDR
     base_url: "http://vault:8200/v1"       # VAULT_BASE_URL
@@ -33,8 +33,9 @@ global:
     vault_proxy: false                     # VAULT_PROXY
 
   # Postgres credentials - used by the db chart (POSTGRES_USER/PASSWORD)
-  # and by the secrets chart to build DATABASE_URL:
+  # and by identity/schema/credentials to build their DATABASE_URL:
   #   postgres://<username>:<password>@db:5432/<database>
+  # Prefer: export DB_PASSWORD=... before ./install.sh (keeps it out of git)
   db:
     username: postgres
     password: "<DB_PASSWORD>"         # only required input
