@@ -1,3 +1,5 @@
+# filled, environment-specific copies of global-values.yaml (never commit)
+*.local.yaml
 # output of ./install.sh template - contains rendered secrets
 rendered.yaml
 # output of ./test.sh

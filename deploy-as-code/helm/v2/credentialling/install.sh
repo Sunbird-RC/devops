@@ -89,6 +89,16 @@ prepare_password() {
   else
     ok "using global.db.password from $(basename "$VALUES_FILE")"
   fi
+
+  # any other REQUIRED <PLACEHOLDER> still present (comments are ignored)
+  log "Checking required values"
+  local left
+  left="$(grep -vE '^\s*#' "$VALUES_FILE" | sed 's/#.*//' | grep -nE '<[A-Z_]+>' | grep -v '<DB_PASSWORD>' || true)"
+  if [[ -n "$left" ]]; then
+    echo "$left" | sed 's/^/    /'
+    die "fill the REQUIRED values above in $(basename "$VALUES_FILE") (replace the <...> placeholders)"
+  fi
+  ok "all required values set"
 }
 
 check_cluster() {
@@ -302,7 +312,10 @@ cmd_test() {
   local set="${1:-all}"
   local host base results collection stamp code fail=0 svc
   host="$(awk '/^global:/{g=1} g && /^  host:/{gsub(/"/,"",$2); print $2; exit}' "$VALUES_FILE" 2>/dev/null || true)"
-  base="${BASE_URL:-http://${host:-dev.sunbirded.org}}"; base="${base%/}"
+  if [[ -z "${BASE_URL:-}" && ( -z "$host" || "$host" == *"<"* ) ]]; then
+    die "set global.host in $(basename "$VALUES_FILE") or run with BASE_URL=http://<domain>"
+  fi
+  base="${BASE_URL:-http://$host}"; base="${base%/}"
   results="$SCRIPT_DIR/test-results"
   collection="${COLLECTION:-$SCRIPT_DIR/tests/adopter-testing.postman_collection.json}"
   mkdir -p "$results"

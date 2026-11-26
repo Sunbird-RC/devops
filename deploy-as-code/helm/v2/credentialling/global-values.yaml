@@ -1,29 +1,35 @@
 # =============================================================================
 # Sunbird RC Credentialling - environment inputs (equivalent of docker .env)
 #
-# Deploy (from deploy-as-code/helm/v2/credentialling):
-#   export DB_PASSWORD='<strong-password>'
+# Fill every value marked REQUIRED (replace the <...> placeholder), then deploy
+# from deploy-as-code/helm/v2/credentialling:
 #   ./install.sh install
+# install.sh stops if a REQUIRED placeholder is still present.
 #
 # images.yaml           -> image versions
 # global-resources.yaml -> cpu / memory / volume sizes
 # global-values.yaml    -> this file: environment settings
 #
-# Do NOT commit real passwords. Keep a filled copy outside git.
+# Do NOT commit real passwords. Prefer: export DB_PASSWORD=... before install.
 # =============================================================================
 
 global:
-  host: "dev.sunbirded.org"
+  # REQUIRED. Domain that points to the nginx EXTERNAL-IP (no http://, no path).
+  # Format: <DOMAIN>            e.g. dev.example.org
+  host: "<DOMAIN>"
 
   sunbird:
-    enable_auth: false               # ENABLE_AUTH
-    jwks_uri: ""                     # JWKS_URI (required if enable_auth: true)
+    enable_auth: false               # ENABLE_AUTH (true needs jwks_uri)
+    jwks_uri: ""                     # JWKS_URI - REQUIRED only if enable_auth: true
+                                     # Format: https://<KEYCLOAK_DOMAIN>/auth/realms/<REALM>/protocol/openid-connect/certs
     signing_algo: Ed25519Signature2020   # SIGNING_ALGORITHM (Ed25519Signature2020 | Ed25519Signature2018)
     qr_type: W3C_VC                  # QR_TYPE
-    web_did_base_url: "http://dev.sunbirded.org/identity-service"   # WEB_DID_BASE_URL (did:web documents)
+    # REQUIRED. Base URL for did:web documents, served by identity-service through nginx.
+    # Format: http(s)://<DOMAIN>/identity-service   e.g. http://dev.example.org/identity-service
+    web_did_base_url: "http://<DOMAIN>/identity-service"
 
-  # Vault runs in-cluster (vault chart), service name "vault".
-  # No token here - the vault-setup Job creates it and stores it in
+  # Vault runs in-cluster (vault chart), service name "vault". Defaults are correct.
+  # No token here - the vault setup Job creates it and stores it in
   # Secret "vault-token", which identity-service reads as VAULT_TOKEN.
   vault:
     address: "http://vault:8200"           # VAULT_ADDR
@@ -35,27 +41,28 @@ global:
   # Postgres credentials - used by the db chart (POSTGRES_USER/PASSWORD)
   # and by identity/schema/credentials to build their DATABASE_URL:
   #   postgres://<username>:<password>@db:5432/<database>
-  # Prefer: export DB_PASSWORD=... before ./install.sh (keeps it out of git)
   db:
     username: postgres
-    password: "<DB_PASSWORD>"         # only required input
+    # REQUIRED. Strong password. Prefer setting it via: export DB_PASSWORD='...'
+    # (the environment variable overrides this value and keeps it out of git).
+    password: "<DB_PASSWORD>"
     database: postgres
 
 # -----------------------------------------------------------------------------
 # Public entry point: nginx (LoadBalancer). Routes:
 #   /identity-service/  /credential-schema-service/  /credentials-service/  /oid4vc-service/
-# After install: kubectl get svc rc-nginx -n sunbird  -> EXTERNAL-IP
-# Point global.host (DNS A record) to that IP.
+# After install: kubectl get svc rc-nginx -n <namespace>  -> EXTERNAL-IP
+# Point the DNS A record of global.host to that IP.
 # Set nginx.enabled: false if another proxy (e.g. Spark nginx-public-ingress) is used.
 # -----------------------------------------------------------------------------
 nginx:
   enabled: true
   service:
     annotations: {}
-      # use an existing static public IP instead of a new one:
-      # service.beta.kubernetes.io/azure-load-balancer-ipv4: "<ip>"
-      # service.beta.kubernetes.io/azure-load-balancer-resource-group: "<rg of the ip>"
-    loadBalancerSourceRanges: []      # e.g. ["106.51.119.79/32"] to allow only office
+      # Optional - use an existing static public IP instead of a new one:
+      # service.beta.kubernetes.io/azure-load-balancer-ipv4: "<STATIC_IP>"
+      # service.beta.kubernetes.io/azure-load-balancer-resource-group: "<IP_RESOURCE_GROUP>"
+    loadBalancerSourceRanges: []      # Optional - allow only these CIDRs, e.g. ["<OFFICE_IP>/32"]
 
 # Per-service ingress objects are not used (nginx above does the routing).
 identity-service:
@@ -79,7 +86,7 @@ vault:
     keyShares: 5
     keyThreshold: 3
     kvPath: kv
-    keysSecretName: vault-keys        # unseal keys + root token (= keys.txt)
+    keysSecretName: vault-keys        # unseal keys + root token (= keys.txt) - BACK IT UP
     restartDeployments: []            # empty = <release>-identity-service
   autoUnseal:
     enabled: true                     # unseal automatically after vault pod restart
@@ -92,14 +99,15 @@ oid4vc-service:
   ingress:
     enabled: false
   env:
-    PUBLIC_URL: ""                    # empty = http://<global.host>/oid4vc-service
-    INTERNAL_URL: ""                  # empty = http://<release>-oid4vc-service:3400
+    PUBLIC_URL: ""                    # Optional. Empty = http://<global.host>/oid4vc-service
+                                      # Set https://<DOMAIN>/oid4vc-service when TLS is in front
+    INTERNAL_URL: ""                  # Optional. Empty = http://<release>-oid4vc-service:3400
     SESSION_STORE: "memory"           # memory | redis
-    REDIS_URL: ""                     # needed only if SESSION_STORE=redis
-    ISSUER_DID: ""
-    VERIFIER_DID: ""
+    REDIS_URL: ""                     # REQUIRED only if SESSION_STORE=redis. Format: redis://<HOST>:6379
+    ISSUER_DID: ""                    # Optional. DID created via identity-service (did:rcw:...)
+    VERIFIER_DID: ""                  # REQUIRED only if OID4VP_SIGN_REQUEST=true
     OID4VP_ENABLED: "true"
     DRAFT13_COMPAT_MODE: "false"
     OID4VP_SIGN_REQUEST: "false"
     OID4VP_LEGACY_CLIENT_ID_SCHEME: "false"
-    AUTH_ISSUER: ""
+    AUTH_ISSUER: ""                   # REQUIRED only if enable_auth: true. Format: https://<KEYCLOAK_DOMAIN>/auth/realms/<REALM>
