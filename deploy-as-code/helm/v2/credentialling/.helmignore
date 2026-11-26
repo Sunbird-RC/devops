@@ -1,6 +1,6 @@
 # Not part of the chart package - deploy tooling and environment inputs
 install.sh
-tests/
+postman-collection.json
 test-results/
 README.md
 FLOW.md

@@ -157,7 +157,31 @@ schema reaches identity, credential reaches schema and identity, and oid4vc reac
 
 ---
 
-## 5. Things to keep in mind
+## 5. API tests (Postman collection)
+
+`postman-collection.json` is the Sunbird RC adopter Postman collection (identity, credential schema, credentials, OID4VC). `./install.sh test` runs it with Newman against `http://<global.host>`:
+
+```bash
+./install.sh test core      # identity + schema + credentials
+./install.sh test oid4vc    # OID4VC issuance / presentation flows
+./install.sh test           # everything
+```
+
+Other sets: `identity`, `schema`, `credentials`. Override the target with `BASE_URL=http://<host>`. Reports are written to `test-results/` (not committed). The file can also be imported into Postman; set the collection variables `identity_base`, `schema_base`, `credential_base`, `oid4vc_base` to `http://<host>/identity-service`, `http://<host>/credential-schema-service`, `http://<host>/credentials-service`, `http://<host>/oid4vc-service`.
+
+Source: [Sunbird-RC/sunbird-rc-core](https://github.com/Sunbird-RC/sunbird-rc-core), branch `v2.1.1`, `services/adopter-testing.postman_collection.json`. That collection targets the `v2.1.1` branch, while the released images are `v2.1.0`, so three requests are adjusted:
+
+| Request | Change | Reason (v2.1.0 behaviour) |
+|---|---|---|
+| List schemas | added `?tags=postman-crud` | listing without `tags` returns 500 |
+| List credentials | added `?tags=postman-crud` | listing without `tags` returns 500 |
+| Update schema | added `schema.schema.description` | `description` is a required field |
+
+When the images move to a version that includes these fixes, replace the file with the upstream collection unchanged and remove this table.
+
+---
+
+## 6. Things to keep in mind
 
 - **`vault-keys` is the master key.** Anyone who can read it can open vault. If it is lost while the vault volume still exists, vault can never be unsealed again. Back it up and restrict access to it.
 - **The root token is used by identity**, the same as in Docker.

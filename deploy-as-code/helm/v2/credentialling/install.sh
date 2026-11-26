@@ -10,7 +10,7 @@
 #   ./install.sh template [chart|group ...]  # render manifests only (dry run)
 #   ./install.sh status                      # pods, vault seal status, nginx IP
 #   ./install.sh test [all|core|identity|schema|credentials|oid4vc]
-#                                            # API tests (official Postman collection, needs node)
+#                                            # run postman-collection.json (needs node)
 #   ./install.sh uninstall                   # remove release (volumes + vault-keys kept)
 #
 # Charts: vault db identity-service credential-schema-service credentials-service
@@ -303,10 +303,10 @@ cmd_status() {
 }
 
 # -----------------------------------------------------------------------------
-# API tests: runs tests/adopter-testing.postman_collection.json with Newman
+# API tests: runs postman-collection.json with Newman (see README.md, "API tests")
 #   ./install.sh test [all|core|identity|schema|credentials|oid4vc]
 #   BASE_URL   default http://<global.host>
-#   COLLECTION default tests/adopter-testing.postman_collection.json (see tests/README.md)
+#   COLLECTION default postman-collection.json
 # -----------------------------------------------------------------------------
 cmd_test() {
   local set="${1:-all}"
@@ -317,7 +317,7 @@ cmd_test() {
   fi
   base="${BASE_URL:-http://$host}"; base="${base%/}"
   results="$SCRIPT_DIR/test-results"
-  collection="${COLLECTION:-$SCRIPT_DIR/tests/adopter-testing.postman_collection.json}"
+  collection="${COLLECTION:-$SCRIPT_DIR/postman-collection.json}"
   mkdir -p "$results"
 
   local f_id="0. Identity Service - CRUD & Utils"
