@@ -1,0 +1,52 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nginx
+  labels:
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  # Rendered by the nginx image at start (envsubst): ${NGINX_LOCAL_RESOLVERS}
+  # is the cluster DNS server. Services are resolved per request, so nginx
+  # starts even if some services are not installed (that path returns 502).
+  default.conf.template: |
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
+
+    server {
+      listen 8080 default_server;   # non-root container port; Service exposes 80
+      server_name {{ .Values.global.host | default "_" }} _;
+
+      client_max_body_size {{ .Values.clientMaxBodySize }};
+      proxy_connect_timeout {{ .Values.proxyTimeoutSeconds }}s;
+      proxy_send_timeout    {{ .Values.proxyTimeoutSeconds }}s;
+      proxy_read_timeout    {{ .Values.proxyTimeoutSeconds }}s;
+
+      proxy_http_version 1.1;
+      proxy_set_header Host              $host;
+      proxy_set_header X-Real-IP         $remote_addr;
+      proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+
+      # nginx's own health check (used by the probes)
+      location = /healthz {
+        access_log off;
+        return 200 "ok\n";
+      }
+
+      {{- range .Values.routes }}
+      {{- $prefix := trimSuffix "/" .path }}
+
+      # {{ .path }} -> {{ $.Release.Name }}-{{ .service }}:{{ .port }}  (prefix is stripped)
+      location {{ .path }} {
+        set $upstream_{{ .service | replace "-" "_" }} http://{{ $.Release.Name }}-{{ .service }}.{{ $.Release.Namespace }}.svc.cluster.local:{{ .port }};
+        rewrite ^{{ $prefix }}/(.*)$ /$1 break;
+        proxy_pass $upstream_{{ .service | replace "-" "_" }};
+      }
+      {{- end }}
+
+      location / {
+        return 404 "not found\n";
+      }
+    }
+{{- end }}

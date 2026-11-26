@@ -29,8 +29,12 @@ images:
     repository: "postgres"
     tag: "18-alpine"
 
+  nginx: &nginx
+    repository: "nginxinc/nginx-unprivileged"   # official nginx build that runs as non-root
+    tag: "1.28-alpine"
+
   # used by the vault setup Job (needs kubectl + /bin/sh)
-  kubectl: &kubectl "alpine/k8s:1.34.13"
+  kubectl: &kubectl "alpine/k8s:1.36.6"
 
 # -----------------------------------------------------------------------------
 # Mapping: chart name -> image
@@ -54,3 +58,6 @@ vault:
 
 db:
   image: *postgres
+
+nginx:
+  image: *nginx

@@ -29,6 +29,15 @@ persistence:
   storageClass: ""
 
 resources: {}
+
+# Restrict who can connect to postgres (NetworkPolicy; needs a CNI that enforces it)
+networkPolicy:
+  enabled: true
+  allowFrom:            # app.kubernetes.io/name of pods allowed
+    - identity-service
+    - credential-schema-service
+    - credentials-service
+
 nodeSelector: {}
 tolerations: []
 affinity: {}

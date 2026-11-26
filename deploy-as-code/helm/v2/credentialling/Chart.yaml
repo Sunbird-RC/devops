@@ -1,24 +1,31 @@
 apiVersion: v2
 name: sunbird_rc_charts
-description: A Helm chart for Sunbird RC
-
-# A chart can be either an 'application' or a 'library' chart.
-#
-# Application charts are a collection of templates that can be packaged into versioned archives
-# to be deployed.
-#
-# Library charts provide useful utilities or functions for the chart developer. They're included as
-# a dependency of application charts to inject those utilities and functions into the rendering
-# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+description: Sunbird RC credentialling - vault, db, identity, credential-schema, credentials, oid4vc and nginx
 type: application
-
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
 version: 0.0.1
-
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
-# It is recommended to use it with quotes.
 appVersion: "0.0.13"
+# Sub-charts live in ./charts (no repository - nothing to download).
+# Each can be switched on/off with <name>.enabled (install.sh sets these).
+# Versions must match charts/*/Chart.yaml.
+dependencies:
+  - name: vault
+    version: 0.0.1
+    condition: vault.enabled
+  - name: db
+    version: 0.0.1
+    condition: db.enabled
+  - name: identity-service
+    version: 0.1.0
+    condition: identity-service.enabled
+  - name: credential-schema-service
+    version: 0.1.0
+    condition: credential-schema-service.enabled
+  - name: credentials-service
+    version: 0.1.0
+    condition: credentials-service.enabled
+  - name: oid4vc-service
+    version: 0.0.1
+    condition: oid4vc-service.enabled
+  - name: nginx
+    version: 0.0.1
+    condition: nginx.enabled

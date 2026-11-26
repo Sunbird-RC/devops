@@ -18,9 +18,9 @@ global:
   sunbird:
     enable_auth: false               # ENABLE_AUTH
     jwks_uri: ""                     # JWKS_URI (required if enable_auth: true)
-    signing_algo: Ed25519            # SIGNING_ALGORITHM
+    signing_algo: Ed25519Signature2020   # SIGNING_ALGORITHM (Ed25519Signature2020 | Ed25519Signature2018)
     qr_type: W3C_VC                  # QR_TYPE
-    web_did_base_url: "https://example.com/identifier"   # WEB_DID_BASE_URL
+    web_did_base_url: "http://dev.sunbirded.org/identity-service"   # WEB_DID_BASE_URL (did:web documents)
 
   # Vault runs in-cluster (vault chart), service name "vault".
   # No token here - the vault-setup Job creates it and stores it in
@@ -42,10 +42,22 @@ global:
     database: postgres
 
 # -----------------------------------------------------------------------------
-# Ingress: none. Services are cluster-internal
-# (http://rc-identity-service:3332 etc.). The public IP / domain belongs to
-# Spark's nginx-public-ingress; add routes there for public access.
+# Public entry point: nginx (LoadBalancer). Routes:
+#   /identity-service/  /credential-schema-service/  /credentials-service/  /oid4vc-service/
+# After install: kubectl get svc rc-nginx -n sunbird  -> EXTERNAL-IP
+# Point global.host (DNS A record) to that IP.
+# Set nginx.enabled: false if another proxy (e.g. Spark nginx-public-ingress) is used.
 # -----------------------------------------------------------------------------
+nginx:
+  enabled: true
+  service:
+    annotations: {}
+      # use an existing static public IP instead of a new one:
+      # service.beta.kubernetes.io/azure-load-balancer-ipv4: "<ip>"
+      # service.beta.kubernetes.io/azure-load-balancer-resource-group: "<rg of the ip>"
+    loadBalancerSourceRanges: []      # e.g. ["106.51.119.79/32"] to allow only office
+
+# Per-service ingress objects are not used (nginx above does the routing).
 identity-service:
   ingress:
     enabled: false

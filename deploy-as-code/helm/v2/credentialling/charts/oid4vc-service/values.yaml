@@ -16,6 +16,12 @@ service:
   type: ClusterIP
   port: 3400
 
+# Ports of the services oid4vc calls (must match their service.port)
+ports:
+  identity: 3332
+  schema: 3333
+  credentials: 3000
+
 ingress:
   enabled: true
   className: nginx

@@ -5,6 +5,9 @@ metadata:
   labels:
     app.kubernetes.io/name: vault
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Values.image.tag | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
 spec:
   serviceName: vault-internal
   replicas: 1
@@ -20,6 +23,15 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
+      # vault image user: uid 100 / gid 1000. Running as that user directly,
+      # so the image entrypoint skips its root-only chown/su-exec step.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: vault
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -37,10 +49,12 @@ spec:
             # disable_mlock is true in vault.json, so no setcap needed
             - name: SKIP_SETCAP
               value: "true"
+          # compose adds IPC_LOCK for mlock; not needed because vault.json sets
+          # disable_mlock = true, so all capabilities are dropped.
           securityContext:
-            # compose: cap_add: IPC_LOCK
+            allowPrivilegeEscalation: false
             capabilities:
-              add: ["IPC_LOCK"]
+              drop: ["ALL"]
           ports:
             - name: http
               containerPort: 8200
@@ -87,6 +101,10 @@ spec:
           env:
             - name: VAULT_ADDR
               value: "http://127.0.0.1:8200"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           volumeMounts:
             - name: keys
               mountPath: /keys

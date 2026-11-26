@@ -16,6 +16,13 @@ persistence:
   storageClass: ""
 
 resources: {}
+
+# Restrict who can connect to vault (NetworkPolicy; needs a CNI that enforces it)
+networkPolicy:
+  enabled: true
+  allowFrom:            # app.kubernetes.io/name of pods allowed (plus the setup Job)
+    - identity-service
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
@@ -38,7 +45,7 @@ setup:
   # Deployments restarted when the token changes. Empty = <release>-identity-service
   restartDeployments: []
   # Needs kubectl + /bin/sh + base64. (bitnami/kubectl versioned tags were removed in 2025)
-  kubectlImage: alpine/k8s:1.34.13
+  kubectlImage: alpine/k8s:1.36.6
 
 # Sidecar that unseals vault after a pod restart using keys from the Secret
 # (setup_vault.sh does not do this; in docker you re-run it by hand).

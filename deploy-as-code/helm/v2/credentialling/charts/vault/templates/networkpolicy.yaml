@@ -1,0 +1,34 @@
+{{- if .Values.networkPolicy.enabled }}
+# Only identity-service and the vault setup Job may connect to vault.
+# (The auto-unseal sidecar runs in the vault pod itself and uses localhost.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vault
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: vault
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: {{ toJson .Values.networkPolicy.allowFrom }}
+              - key: app.kubernetes.io/instance
+                operator: In
+                values: [{{ .Release.Name | quote }}]
+        - podSelector:
+            matchLabels:
+              job-name: vault-setup
+      ports:
+        - port: 8200
+          protocol: TCP
+{{- end }}

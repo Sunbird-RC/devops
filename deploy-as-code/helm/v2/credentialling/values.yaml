@@ -8,7 +8,7 @@ global:
   sunbird:
     enable_auth: false
     jwks_uri: ""
-    signing_algo: Ed25519
+    signing_algo: Ed25519Signature2020
     qr_type: W3C_VC
     web_did_base_url: ""
 

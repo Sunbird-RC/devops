@@ -1,5 +1,7 @@
 # Not part of the chart package - deploy tooling and environment inputs
 install.sh
+tests/
+test-results/
 README.md
 FLOW.md
 images.yaml

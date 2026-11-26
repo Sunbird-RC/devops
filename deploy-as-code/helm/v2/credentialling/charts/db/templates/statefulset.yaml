@@ -6,6 +6,9 @@ metadata:
   labels:
     app.kubernetes.io/name: db
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Values.image.tag | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
 spec:
   serviceName: db-internal
   replicas: 1
@@ -19,10 +22,22 @@ spec:
         app.kubernetes.io/name: db
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      # postgres alpine image: uid/gid 70. Runs as that user directly (no root step).
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: postgres
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           env:
             - name: POSTGRES_USER
               valueFrom:
