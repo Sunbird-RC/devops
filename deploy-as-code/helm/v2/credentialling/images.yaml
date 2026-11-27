@@ -7,19 +7,19 @@
 images:
   identity_service: &identity_service
     repository: "ghcr.io/sunbird-rc/sunbird-rc-identity-service"
-    tag: "v2.1.0"
+    tag: "v2.1.0.1"
 
   credential_schema_service: &credential_schema_service
     repository: "ghcr.io/sunbird-rc/sunbird-rc-credential-schema"
-    tag: "v2.1.0"
+    tag: "v2.1.0.1"
 
   credentials_service: &credentials_service
     repository: "ghcr.io/sunbird-rc/sunbird-rc-credentials-service"
-    tag: "v2.1.0"
+    tag: "v2.1.0.1"
 
   oid4vc_service: &oid4vc_service
     repository: "ghcr.io/sunbird-rc/sunbird-rc-oid4vc-service"
-    tag: "v2.1.0"
+    tag: "v2.1.0.1"
 
   vault: &vault
     repository: "vault"
