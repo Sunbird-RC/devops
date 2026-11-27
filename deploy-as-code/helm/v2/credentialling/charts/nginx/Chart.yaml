@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nginx
+description: Public entry point for Sunbird RC credentialling - nginx proxy routing /identity-service, /credential-schema-service, /credentials-service, /oid4vc-service
+type: application
+version: 0.0.1
+appVersion: "1.28"

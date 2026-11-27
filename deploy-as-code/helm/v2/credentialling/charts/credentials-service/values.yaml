@@ -1,0 +1,40 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/sunbird-rc/sunbird-rc-credentials-service
+  pullPolicy: IfNotPresent
+  # empty = Chart appVersion. Set versions in images.yaml.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 3000
+
+# Ports of the services this one calls
+identityPort: 3332
+schemaPort: 3333
+
+# CREDENTIAL_SERVICE_BASE_URL. Empty = http://<release>-credentials-service:3000 (cluster-internal).
+# Set to the public URL if credentials must carry externally reachable links.
+credentialServiceBaseUrl: ""
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  path: /credentials-service(/|$)(.*)
+  pathType: ImplementationSpecific
+  tls: []
+
+# Extra env vars added to this service's ConfigMap
+extraEnv: {}
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

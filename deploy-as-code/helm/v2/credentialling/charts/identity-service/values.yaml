@@ -1,0 +1,38 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/sunbird-rc/sunbird-rc-identity-service
+  pullPolicy: IfNotPresent
+  # empty = Chart appVersion. Set versions in images.yaml.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 3332
+
+# VAULT_TOKEN comes from this Secret, created by the vault setup Job.
+# optional: the pod starts before the Job runs; the Job restarts it afterwards.
+vaultToken:
+  secretName: vault-token
+  key: VAULT_TOKEN
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  path: /identity-service(/|$)(.*)
+  pathType: ImplementationSpecific
+  tls: []
+
+# Extra env vars added to this service's ConfigMap
+extraEnv: {}
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

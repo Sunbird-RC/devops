@@ -1,0 +1,30 @@
+{{- if .Values.networkPolicy.enabled }}
+# Only the services that use the database may connect to it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db
+  labels:
+    app.kubernetes.io/name: db
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: db
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: {{ toJson .Values.networkPolicy.allowFrom }}
+              - key: app.kubernetes.io/instance
+                operator: In
+                values: [{{ .Release.Name | quote }}]
+      ports:
+        - port: 5432
+          protocol: TCP
+{{- end }}

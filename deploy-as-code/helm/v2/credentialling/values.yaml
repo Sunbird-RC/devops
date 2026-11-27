@@ -1,0 +1,27 @@
+# Umbrella chart defaults. Environment values go in global-values.yaml,
+# images in images.yaml, cpu/memory in global-resources.yaml.
+# No secrets here - the DB password comes from global-values.yaml or $DB_PASSWORD,
+# the vault token is created at install time by the vault setup Job.
+global:
+  host: ""
+
+  sunbird:
+    enable_auth: false
+    jwks_uri: ""
+    signing_algo: Ed25519Signature2020
+    qr_type: W3C_VC
+    web_did_base_url: ""
+
+  vault:
+    address: "http://vault:8200"
+    base_url: "http://vault:8200/v1"
+    root_path: "http://vault:8200/v1/kv"
+    vault_timeout: 5000
+    vault_proxy: false
+
+  db:
+    host: db
+    port: 5432
+    username: postgres
+    password: ""
+    database: postgres

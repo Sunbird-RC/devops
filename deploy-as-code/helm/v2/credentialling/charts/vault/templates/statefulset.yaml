@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vault
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Values.image.tag | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
+spec:
+  serviceName: vault-internal
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vault
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vault
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      # vault image user: uid 100 / gid 1000. Running as that user directly,
+      # so the image entrypoint skips its root-only chown/su-exec step.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: vault
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # compose: command: vault server -config=/vault/config/vault.json
+          # (first arg "vault", not "server", so the image entrypoint does not add its own -config/-dev flags)
+          args: ["vault", "server", "-config=/vault/config/vault.json"]
+          env:
+            - name: VAULT_ADDR
+              value: "http://127.0.0.1:8200"
+            - name: VAULT_API_ADDR
+              value: "http://vault:{{ .Values.service.port }}"
+            - name: VAULT_ADDRESS
+              value: "http://127.0.0.1:8200"
+            # disable_mlock is true in vault.json, so no setcap needed
+            - name: SKIP_SETCAP
+              value: "true"
+          # compose adds IPC_LOCK for mlock; not needed because vault.json sets
+          # disable_mlock = true, so all capabilities are dropped.
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: 8200
+              protocol: TCP
+          # Ready even when sealed/uninitialised so the setup job can reach it via the Service.
+          readinessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          volumeMounts:
+            - name: config
+              mountPath: /vault/config
+            - name: data
+              mountPath: /vault/file
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.autoUnseal.enabled }}
+        # Unseals vault after restarts using keys saved by the setup job.
+        - name: auto-unseal
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                if [ -s /keys/unseal_key_1 ]; then
+                  vault status >/dev/null 2>&1
+                  if [ $? -eq 2 ]; then
+                    echo "vault sealed, unsealing"
+                    for i in $(seq 1 {{ .Values.setup.keyThreshold }}); do
+                      vault operator unseal "$(cat /keys/unseal_key_$i)" >/dev/null
+                    done
+                  fi
+                fi
+                sleep {{ .Values.autoUnseal.intervalSeconds }}
+              done
+          env:
+            - name: VAULT_ADDR
+              value: "http://127.0.0.1:8200"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: keys
+              mountPath: /keys
+              readOnly: true
+        {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: vault-config
+        {{- if .Values.autoUnseal.enabled }}
+        - name: keys
+          secret:
+            secretName: {{ .Values.setup.keysSecretName }}
+            optional: true
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}

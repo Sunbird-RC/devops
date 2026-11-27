@@ -1,0 +1,35 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/sunbird-rc/sunbird-rc-credential-schema
+  pullPolicy: IfNotPresent
+  # empty = Chart appVersion. Set versions in images.yaml.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 3333
+
+# Port of identity-service (for IDENTITY_BASE_URL)
+identityPort: 3332
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  path: /credential-schema-service(/|$)(.*)
+  pathType: ImplementationSpecific
+  tls: []
+
+# Extra env vars added to this service's ConfigMap
+extraEnv: {}
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

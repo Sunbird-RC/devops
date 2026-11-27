@@ -1,0 +1,43 @@
+# Official postgres image (compose uses postgres:12.1-alpine; upgraded to 18).
+# "18-alpine" pins the major version; minor/security patches come with re-pulls.
+image:
+  repository: postgres
+  tag: "18-alpine"
+  pullPolicy: IfNotPresent
+
+# Service name is fixed to "db" - same host as compose:
+#   DATABASE_URL=postgres://<user>:<password>@db:5432/postgres
+# Set global.secrets.DB_URL (rc-secret DATABASE_URL) to that URL.
+service:
+  type: ClusterIP
+  port: 5432
+
+# POSTGRES_USER / POSTGRES_PASSWORD (compose reads them from .env).
+# Normally set via global.db.* (shared with the secrets chart, which builds
+# DATABASE_URL from it). These are only fallbacks.
+auth:
+  username: postgres
+  # Required unless existingSecret is set. Pass at install: --set db.auth.password=...
+  password: ""
+  database: postgres
+  # Use an existing Secret instead (keys: POSTGRES_USER, POSTGRES_PASSWORD)
+  existingSecret: ""
+
+# Same as ./db-data volume in compose
+persistence:
+  size: 8Gi
+  storageClass: ""
+
+resources: {}
+
+# Restrict who can connect to postgres (NetworkPolicy; needs a CNI that enforces it)
+networkPolicy:
+  enabled: true
+  allowFrom:            # app.kubernetes.io/name of pods allowed
+    - identity-service
+    - credential-schema-service
+    - credentials-service
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

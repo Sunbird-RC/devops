@@ -1,0 +1,6 @@
+apiVersion: v2
+name: credentials-service
+description: Sunbird RC credentials service - issues and verifies verifiable credentials
+type: application
+version: 0.1.0
+appVersion: "v2.1.0"

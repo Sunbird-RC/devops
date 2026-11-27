@@ -1,0 +1,71 @@
+# =============================================================================
+# CPU / memory for every Sunbird RC credentialling component
+# Passed to helm with: -f global-resources.yaml
+# =============================================================================
+
+identity-service:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2G
+    limits:
+      cpu: 1
+      memory: 2G
+
+credential-schema-service:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2G
+    limits:
+      cpu: 1
+      memory: 2G
+
+credentials-service:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2G
+    limits:
+      cpu: 1
+      memory: 2G
+
+oid4vc-service:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+vault:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  persistence:
+    size: 1Gi
+
+nginx:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+db:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
+  persistence:
+    size: 8Gi

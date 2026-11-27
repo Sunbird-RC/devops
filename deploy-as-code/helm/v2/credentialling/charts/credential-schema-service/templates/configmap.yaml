@@ -1,0 +1,15 @@
+{{- $g := .Values.global }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "credential-schema-service.fullname" . }}
+  labels:
+    {{- include "credential-schema-service.labels" . | nindent 4 }}
+data:
+  # same env as the "schema" service in docker/v2/credentialling/docker-compose.yml
+  IDENTITY_BASE_URL: {{ printf "http://%s-identity-service:%v" .Release.Name .Values.identityPort | quote }}
+  ENABLE_AUTH: {{ $g.sunbird.enable_auth | quote }}
+  JWKS_URI: {{ $g.sunbird.jwks_uri | quote }}
+  {{- range $k, $v := .Values.extraEnv }}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}

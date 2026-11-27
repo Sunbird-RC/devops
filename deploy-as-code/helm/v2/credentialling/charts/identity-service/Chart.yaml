@@ -1,0 +1,6 @@
+apiVersion: v2
+name: identity-service
+description: Sunbird RC identity service - creates DIDs and signs data (keys stored in vault)
+type: application
+version: 0.1.0
+appVersion: "v2.1.0"

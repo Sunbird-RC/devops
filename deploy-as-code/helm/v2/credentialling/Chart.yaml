@@ -1,0 +1,31 @@
+apiVersion: v2
+name: sunbird_rc_charts
+description: Sunbird RC credentialling - vault, db, identity, credential-schema, credentials, oid4vc and nginx
+type: application
+version: 0.0.1
+appVersion: "0.0.13"
+# Sub-charts live in ./charts (no repository - nothing to download).
+# Each can be switched on/off with <name>.enabled (install.sh sets these).
+# Versions must match charts/*/Chart.yaml.
+dependencies:
+  - name: vault
+    version: 0.0.1
+    condition: vault.enabled
+  - name: db
+    version: 0.0.1
+    condition: db.enabled
+  - name: identity-service
+    version: 0.1.0
+    condition: identity-service.enabled
+  - name: credential-schema-service
+    version: 0.1.0
+    condition: credential-schema-service.enabled
+  - name: credentials-service
+    version: 0.1.0
+    condition: credentials-service.enabled
+  - name: oid4vc-service
+    version: 0.0.1
+    condition: oid4vc-service.enabled
+  - name: nginx
+    version: 0.0.1
+    condition: nginx.enabled
